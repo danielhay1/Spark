@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activiities.MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/main_NAVBAR"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabIndicatorColor="@color/appBackgroundColor"
+            app:tabSelectedTextColor="@color/appBackgroundColor"
+            >
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/main_NAVBAR_main"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Main" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/main_NAVBAR_history"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="history" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/main_NAVBAR_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="profile" />
+        </com.google.android.material.tabs.TabLayout>
+
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/main_VIEWPAGER"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+<!--
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/map"/>
+
+
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Park"/>
+-->
+</RelativeLayout>
+
