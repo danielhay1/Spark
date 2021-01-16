@@ -9,6 +9,8 @@ import android.util.Log;
 
 import com.example.spark.R;
 import com.example.spark.objects.PagerAdapter;
+import com.example.spark.untils.MyLocationServices;
+import com.example.spark.untils.GpsTracker_service;
 import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,6 +35,9 @@ public class MainActivity extends AppCompatActivity{
             findViews();
             initNavBar();
         }
+
+/*        findViews();            //without firebase connection
+        initNavBar();*/
     }
 
     private void findViews() {
@@ -66,6 +71,7 @@ public class MainActivity extends AppCompatActivity{
             }
         });
         main_VIEWPAGER.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(main_NAVBAR));
+        //EnableMyLocationServices();
     }
 
     private boolean fireBaseLogin() {
@@ -97,5 +103,52 @@ public class MainActivity extends AppCompatActivity{
         return loginSuccess;
     }
 
+    private void EnableMyLocationServices() {
+        // Bind to LocalService
+        Log.d("pttt", "EnableMyLocationServices: ");
+        if(MyLocationServices.getInstance().checkLocationPermission()) {
+            if(MyLocationServices.getInstance().isGpsEnabled()) {
+                Intent intent = new Intent(this, GpsTracker_service.class);
+                startService(intent);
+            }
+        }
+    }
 
+    private void disableMyLocationServices() {
+        Log.d("pttt", "disableMyLocationServices: ");
+        this.stopService(new Intent(this,GpsTracker_service.class));
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d("pttt", "onStart: ");
+        EnableMyLocationServices();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("pttt", "onResume: ");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d("pttt", "onPause: ");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("pttt", "onStop: ");
+        disableMyLocationServices();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("pttt", "onDestroy: ");
+    }
 }

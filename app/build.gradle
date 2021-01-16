@@ -42,6 +42,9 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation 'com.google.android.gms:play-services-location:17.0.0'
     //GoogleMaps api draw routes
+    implementation 'com.google.maps:google-maps-services:0.15.0'
+    implementation 'org.slf4j:slf4j-nop:1.7.25'
+    //may delete
     implementation 'com.github.jd-alexander:library:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
 

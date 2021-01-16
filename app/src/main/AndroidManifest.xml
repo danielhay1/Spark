@@ -26,9 +26,9 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/map_key" />
-
+            android:value="@string/api_key" />
         <activity android:name=".activiities.MainActivity"></activity>
+        <service android:name=".untils.GpsTracker_service"/>
     </application>
 
 </manifest>

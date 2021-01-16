@@ -17,6 +17,18 @@
         android:background="@color/white"
         android:textColor="@color/appBackgroundColor"
         />
+    <TextView
+        android:id="@+id/map_TV_distance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/map_SWITCH_autopark"
+        android:text="Route distance:"
+        android:textStyle="bold"
+        android:textColor="@color/appBackgroundColor"
+        android:background="@color/white"
+        android:textSize="8pt"
+        android:gravity="center_horizontal"
+        android:visibility="invisible"/>
 
     <ImageView
         android:id="@+id/map_BTN_cancelparking"
@@ -25,7 +37,7 @@
         android:src="@drawable/cancel_park_icon"
         android:alpha="0.85"
         android:layout_gravity="left"
-        android:layout_below="@+id/map_SWITCH_autopark"
+        android:layout_below="@+id/map_TV_distance"
         android:layout_marginLeft="24dp"
         android:layout_marginTop="24dp"
         android:visibility="invisible"
@@ -35,26 +47,38 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
         android:gravity="bottom|center_horizontal"
         android:orientation="vertical">
 
+        <!--search icon-->
+        <ImageView
+            android:id="@+id/map_BTN_parkingFocus"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="right"
+            android:layout_marginRight="24dp"
+            android:layout_marginBottom="24dp"
+            android:foreground="@drawable/ripple_effect"
+            android:src="@drawable/parking_btn_focus_icon"
+            android:visibility="invisible" />
         <ImageView
             android:id="@+id/map_BTN_LocationFocus"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/icon_mylocation_focus"
             android:layout_gravity="right"
             android:layout_marginRight="24dp"
             android:layout_marginBottom="124dp"
             android:foreground="@drawable/ripple_effect"
-            />
+            android:src="@drawable/icon_mylocation_focus" />
 
         <ImageView
             android:id="@+id/map_BTN_park"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_marginBottom="14dp"
-            android:src="@drawable/parking_btn_icon"
-            android:foreground="@drawable/ripple_effect"/>
+            android:foreground="@drawable/ripple_effect"
+            android:src="@drawable/parking_btn_icon" />
     </LinearLayout>
 </RelativeLayout>
