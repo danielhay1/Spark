@@ -41,7 +41,6 @@ public class GpsTracker_service extends Service {
         }
     };
 
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("pttt", "onStartCommand");
@@ -111,27 +110,17 @@ public class GpsTracker_service extends Service {
         }
     }
 
-
-
     public void stopUpdateCurrentLocation() {
         Log.d("pttt", "stopUpdateCurrentLocation");
         MyLocationServices.getInstance().stopLocationUpdate(new MyLocationServices.CallBack_Location() {
             @Override
             public void locationReady(Location location) {
-                locationListener.onLocationChanged(location);
-                Log.d("pttt", "stopUpdateCurrentLocation - \tlocationReady: "+location);
             }
-
             @Override
             public void onError(String error) {
                 Log.d("pttt", "onError: "+error);
             }
         });
-    }
-
-    public void stopUpdateCurrentLocation2() {
-        Log.d("pttt", "stopUpdateCurrentLocation2");
-        MyLocationServices.getInstance().stopLocationUpdate2(locationCallback);
     }
 
     @Nullable
@@ -143,12 +132,11 @@ public class GpsTracker_service extends Service {
     @Override
     public boolean stopService(Intent name) {
         return super.stopService(name);
-
     }
 
     @Override
     public void onDestroy() {
-        stopUpdateCurrentLocation2();
         super.onDestroy();
+        stopUpdateCurrentLocation();
     }
 }

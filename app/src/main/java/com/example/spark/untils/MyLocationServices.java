@@ -33,6 +33,7 @@ public class MyLocationServices {
     private static MyLocationServices instance;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private LocationRequest req;
+    private LocationCallback locationCallback;
 
     public interface CallBack_Location {
         void locationReady(Location location);
@@ -103,6 +104,10 @@ public class MyLocationServices {
         }
     }
 
+    private void setLocationCallBack(LocationCallback locationCallback) {
+        this.locationCallback = locationCallback;
+    }
+
     public void startLocationUpdateds(CallBack_Location callBack_location,LocationCallback locationCallback) {
         if (!checkLocationPermission()) {
             if (callBack_location != null) {
@@ -111,6 +116,7 @@ public class MyLocationServices {
             return;
         }
         if(locationCallback != null) {
+            setLocationCallBack(locationCallback);
             if (req == null) {
                 req = new LocationRequest();
                 req.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -137,33 +143,11 @@ public class MyLocationServices {
 
     public void stopLocationUpdate(CallBack_Location callBack_location) {
         if (fusedLocationProviderClient != null && req != null) {
-            fusedLocationProviderClient.removeLocationUpdates(new LocationCallback() {
-                public void onLocationResult(LocationResult locationResult) {
-                    super.onLocationResult(locationResult);
-                    callBack_location.locationReady(locationResult.getLastLocation());
-                    req = null;
-                    if (req == null)
-                        Log.d("pttt", "stopLocationUpdate: req is null");
-                }
-            });
+            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+            req = null;
+            locationCallback = null;
         } else {
             callBack_location.onError("Location update not requested");
-        }
-    }
-
-    public void stopLocationUpdate2(LocationCallback locationCallback) {
-        if (fusedLocationProviderClient != null && req!=null && locationCallback != null) {
-            try {
-                final Task<Void> voidTask = fusedLocationProviderClient.removeLocationUpdates(locationCallback);
-                if (voidTask.isSuccessful()) {
-                    req = null;
-                    Log.d("pttt", "StopLocation updates successful! ");
-                } else {
-                    Log.d("pttt", "StopLocation updates unsuccessful! " + voidTask.toString());
-                }
-            } catch (SecurityException exp) {
-                Log.d("pttt", " Security exception while removeLocationUpdates");
-            }
         }
     }
 }
