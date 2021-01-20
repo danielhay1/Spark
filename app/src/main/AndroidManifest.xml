@@ -14,21 +14,27 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Spark">
-        <activity android:name=".activiities.SplashActivity"
+        <activity android:name=".activiities.UpdateUserActivity"></activity>
+        <activity
+            android:name=".activiities.SplashActivity"
             android:theme="@style/Theme.MaterialComponents.NoActionBar">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activiities.LoginActivity"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar"/>
+        <activity
+            android:name=".activiities.LoginActivity"
+            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/api_key" />
-        <activity android:name=".activiities.MainActivity"></activity>
-        <service android:name=".untils.GpsTracker_service"/>
+
+        <activity android:name=".activiities.MainActivity" />
+
+        <service android:name=".untils.GpsTracker_service" />
     </application>
 
 </manifest>

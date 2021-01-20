@@ -3,21 +3,92 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.MyProfileFragment"
     android:background="@drawable/gradient_background">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:gravity="center_horizontal"
+        android:layout_marginHorizontal="14dp"
         android:orientation="vertical">
-        <Button
-            android:id="@+id/myprofile_BTN_logout"
+
+        <TextView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/logout"/>
+            android:layout_height="1dp"
+            android:layout_marginTop="34dp"
+            android:layout_weight="1"
+            android:text="My profile"
+            android:textColor="@color/white"
+            android:textSize="14pt"
+            android:textStyle="bold" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_weight="6"
+            android:gravity="left"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/myprofile_TV_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="User name:"
+                android:textColor="@color/white"
+                android:textSize="10pt" />
+
+            <TextView
+                android:id="@+id/myprofile_TV_PhoneNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="34dp"
+                android:text="Phone number:"
+                android:textColor="@color/white"
+                android:textSize="10pt" />
+
+            <TextView
+                android:id="@+id/myprofile_TV_vehicleNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="34dp"
+                android:text="Vehicle number: "
+                android:textColor="@color/white"
+                android:textSize="10pt" />
+
+            <TextView
+                android:id="@+id/myprofile_TV_vehicleNick"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="34dp"
+                android:text="Vehicle nickname:"
+                android:textColor="@color/white"
+                android:textSize="10pt" />
+
+        </LinearLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/updateUser_BTN_editProfile"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_gravity="center_horizontal"
+            android:textSize="7pt"
+            android:layout_weight="1"
+            android:text="Edit Profile"
+            android:textColor="@color/teal_200"
+            app:strokeColor="@color/teal_500"
+            app:cornerRadius="50dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/myprofile_BTN_logout"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1"
+            android:text="@string/logout"
+            android:textSize="7pt"
+            android:backgroundTint="@color/teal_500"
+            android:textColor="@color/light_gray"
+            app:cornerRadius="50dp"/>
     </LinearLayout>
-
-
-
 </FrameLayout>

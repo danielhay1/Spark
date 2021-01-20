@@ -31,7 +31,7 @@
         android:visibility="invisible"/>
 
     <ImageView
-        android:id="@+id/map_BTN_cancelparking"
+        android:id="@+id/map_BTN_cancel"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:src="@drawable/cancel_park_icon"

@@ -1,10 +1,11 @@
-package com.example.spark.activiities;
+package com.example.spark.objects;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.util.Log;
 
+import com.directions.route.AbstractRouting;
 import com.example.spark.R;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -83,11 +84,6 @@ public class RouteBulider {
             Log.d("pttt", "drawRoute: "+e.getLocalizedMessage());
         }
         return path;
-        //Draw the polyline
-/*        if (path.size() > 0) {
-            PolylineOptions opts = new PolylineOptions().addAll(path).color(Color.BLUE).width(5);
-            googleMap.addPolyline(opts);
-        }*/
     }
 
     public PolylineOptions getPolylineRoute() {
@@ -95,12 +91,12 @@ public class RouteBulider {
         path = calcRoute();
         //Draw the polyline
         if (path.size() > 0) {
-            line.addAll(path).color(Color.BLUE).width(5);
+            line.addAll(path).color(appContext.getColor(R.color.teal_200)).width(15);
         }
         return line;
     }
 
-    public void cancelRoute(){
+    public void cancelRoute() {
     }
 
     private void removeRouteFromMap() {

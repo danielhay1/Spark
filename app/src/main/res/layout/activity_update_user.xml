@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
+    tools:context=".activiities.UpdateUserActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="5dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginTop="34dp"
+            android:layout_weight="0.5"
+            android:text="Edit profile"
+            android:textColor="@color/white"
+            android:textSize="14pt"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_margin="5dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/updateUser_EDT_name"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:hint="User name"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textColorHint="@color/light_blue" />
+
+            <EditText
+                android:id="@+id/updateUser_EDT_vehicleNumber"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="16dp"
+                android:layout_weight="1"
+                android:hint="Vehicle number"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textColorHint="@color/light_blue" />
+
+            <EditText
+                android:id="@+id/updateUser_EDT_vehicleNick"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="16dp"
+                android:layout_weight="1"
+                android:ems="10"
+                android:hint="Vehicle nickname"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textColorHint="@color/light_blue" />
+
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/updateUser_BTN_apply"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.2"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="32dp"
+            android:text="Apply"
+
+            android:textColor="@color/teal_200"
+            app:cornerRadius="50dp"
+            app:strokeColor="@color/teal_500" />
+    </LinearLayout>
+</RelativeLayout>

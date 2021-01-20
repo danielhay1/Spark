@@ -11,7 +11,9 @@ import android.view.View;
 import android.view.animation.LinearInterpolator;
 
 import com.example.spark.R;
+import com.example.spark.objects.MyFireBaseServices;
 import com.example.spark.untils.MySignal;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
@@ -45,7 +47,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser user = MyFireBaseServices.getInstance().getFirebaseAuth().getCurrentUser();
         findViews();
         initViews();
         updateUI();
@@ -76,37 +78,43 @@ public class LoginActivity extends AppCompatActivity {
 
     private void codeEnteredProcess() {
         String verficationCode = login_EDT.getEditText().getText().toString();
-        Log.d("pttt", "verficationCode= "+verficationCode);
+        if(!verficationCode.equalsIgnoreCase("")) {
+            Log.d("pttt", "verficationCode= "+verficationCode);
+            FirebaseAuth firebaseAuth = MyFireBaseServices.getInstance().getFirebaseAuth();
+            FirebaseAuthSettings firebaseAuthSettings = firebaseAuth.getFirebaseAuthSettings();
+            firebaseAuthSettings.setAutoRetrievedSmsCodeForPhoneNumber(phoneInput, verficationCode);
 
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseAuthSettings firebaseAuthSettings = firebaseAuth.getFirebaseAuthSettings();
-        firebaseAuthSettings.setAutoRetrievedSmsCodeForPhoneNumber(phoneInput, verficationCode);
-
-        PhoneAuthOptions options = PhoneAuthOptions.newBuilder(firebaseAuth)
-                .setPhoneNumber(phoneInput)
-                .setTimeout(60L, TimeUnit.SECONDS)
-                .setActivity(this)
-                .setCallbacks(onVerificationStateChangedCallbacks)
-                .build();
-        PhoneAuthProvider.verifyPhoneNumber(options);
+            PhoneAuthOptions options = PhoneAuthOptions.newBuilder(firebaseAuth)
+                    .setPhoneNumber(phoneInput)
+                    .setTimeout(60L, TimeUnit.SECONDS)
+                    .setActivity(this)
+                    .setCallbacks(onVerificationStateChangedCallbacks)
+                    .build();
+            PhoneAuthProvider.verifyPhoneNumber(options);
+        } else {
+            MySignal.getInstance().toast("No verfication code inserted");
+        }
     }
 
     private void startLoginProcess() {
         phoneInput = login_EDT.getEditText().getText().toString();
-        Log.d("pttt", "phoneInput= "+phoneInput);
-
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        PhoneAuthOptions options = PhoneAuthOptions.newBuilder(firebaseAuth)
-                .setPhoneNumber(phoneInput)
-                .setTimeout(60L, TimeUnit.SECONDS)
-                .setActivity(this)
-                .setCallbacks(onVerificationStateChangedCallbacks)
-                .build();
-        PhoneAuthProvider.verifyPhoneNumber(options);
+        if(!phoneInput.equalsIgnoreCase("")) {
+            Log.d("pttt", "phoneInput= "+phoneInput);
+            FirebaseAuth firebaseAuth = MyFireBaseServices.getInstance().getFirebaseAuth();
+            PhoneAuthOptions options = PhoneAuthOptions.newBuilder(firebaseAuth)
+                    .setPhoneNumber(phoneInput)
+                    .setTimeout(60L, TimeUnit.SECONDS)
+                    .setActivity(this)
+                    .setCallbacks(onVerificationStateChangedCallbacks)
+                    .build();
+            PhoneAuthProvider.verifyPhoneNumber(options);
+        } else {
+            MySignal.getInstance().toast("No phone number inserted");
+        }
     }
 
     private void loginWithCredential(PhoneAuthCredential phoneAuthCredential) {
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseAuth firebaseAuth =  MyFireBaseServices.getInstance().getFirebaseAuth();
         firebaseAuth.signInWithCredential(phoneAuthCredential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override

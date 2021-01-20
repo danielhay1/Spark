@@ -1,5 +1,7 @@
 package com.example.spark.objects;
 
+import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -8,24 +10,45 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import com.example.spark.fragments.Map_Fragment;
 import com.example.spark.fragments.MyProfileFragment;
 import com.example.spark.fragments.ParkHistoryFragment;
+import com.google.android.gms.maps.MapFragment;
 
 public class PagerAdapter extends FragmentPagerAdapter {
     private int numOfTabs;
-    public PagerAdapter(@NonNull FragmentManager fm, int numOfTabs) {
+    private Bundle fragmentBundle;
+
+    private Map_Fragment map_fragment;
+    private ParkHistoryFragment parkHistoryFragment;
+    private MyProfileFragment myProfileFragment;
+
+    public PagerAdapter(@NonNull FragmentManager fm, int numOfTabs,Bundle fragmentBundle) {
         super(fm);
         this.numOfTabs = numOfTabs;
+        initFragments(fragmentBundle);
     }
+
+    private void initFragments(Bundle fragmentBundle) {
+        map_fragment = new Map_Fragment();
+        parkHistoryFragment = new ParkHistoryFragment();
+        myProfileFragment = new MyProfileFragment();
+        setBundle(fragmentBundle);
+        if(fragmentBundle != null) {
+            map_fragment.setArguments(fragmentBundle);
+            parkHistoryFragment.setArguments(fragmentBundle);
+            myProfileFragment.setArguments(fragmentBundle);
+        }
+    }
+
 
     @NonNull
     @Override
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                return new Map_Fragment();
+                return map_fragment;
             case 1:
-                return new ParkHistoryFragment();
+                return parkHistoryFragment;
             case 2:
-                return new MyProfileFragment();
+                return myProfileFragment;
             default:
                 return null;
         }
@@ -34,5 +57,9 @@ public class PagerAdapter extends FragmentPagerAdapter {
     @Override
     public int getCount() {
         return numOfTabs;
+    }
+
+    public void setBundle(Bundle bundle) {
+        this.fragmentBundle = bundle;
     }
 }

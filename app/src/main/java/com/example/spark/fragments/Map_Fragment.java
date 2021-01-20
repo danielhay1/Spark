@@ -23,7 +23,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.spark.R;
-import com.example.spark.activiities.RouteBulider;
+import com.example.spark.activiities.MainActivity;
+import com.example.spark.objects.RouteBuilder2;
+import com.example.spark.objects.RouteBulider;
 import com.example.spark.objects.LocationReceiver;
 import com.example.spark.untils.ImgLoader;
 import com.example.spark.untils.MyLocationServices;
@@ -44,14 +46,14 @@ import com.google.android.gms.maps.model.Polyline;
 
 public class Map_Fragment extends Fragment{
 
-    private final int NORMAL_SCALE = 15;
+    private final int NORMAL_SCALE = 17;
+    private final int SMALL_SCALE = 15;
     private enum PARKING_STATE {
         DRIVING,
         PARKING,
         NAVIGATING
     }
 
-    private final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private final String CURRENT_LOCATION_ICON = "user_png_marker";
     private final String CAR_ICON = "car_png_marker";
     private final String MY_PREFERENCE_PARKING = "parking_marker";
@@ -71,7 +73,7 @@ public class Map_Fragment extends Fragment{
     //Buttons
     private ImageView map_BTN_park;
     private ImageView map_BTN_LocationFocus;
-    private ImageView map_BTN_cancelparking;
+    private ImageView map_BTN_cancel;
     private ImageView map_BTN_parkingFocus;
     //EditText
     private TextView map_TV_distance;
@@ -79,11 +81,8 @@ public class Map_Fragment extends Fragment{
     //LocationTrack
     private LocationSource.OnLocationChangedListener locationChangedListener;
     private LocationReceiver locationReceiver;
+    private boolean gpsEnabled; //Checks of gps enabled
 
-
-    //Permission
-    private boolean locationPermission = false;
-    private final static int LOCATION_REQUEST_CODE = 23;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -101,10 +100,15 @@ public class Map_Fragment extends Fragment{
             public void onMapReady(GoogleMap map) {
                 //When map is loaded
                 googleMap = map;
-                if(!isMapSetUp) {
-                    setupMap(googleMap);
-                }
                 iniViews();
+                myParkingMarker = loadParkingLocation(MY_PREFERENCE_PARKING);
+                gpsEnabled = isGpsEnabled();    //Ask to enable gps sensor if needed
+                if(!MyLocationServices.getInstance().checkLocationPermission()) {
+                    requestPermision();
+                } else {
+                    initMapFragment();
+                }
+
             }
         });
         return view;
@@ -112,9 +116,8 @@ public class Map_Fragment extends Fragment{
 
     private void findViews(View view) {
         map_BTN_park = view.findViewById(R.id.map_BTN_park);
-
         map_BTN_LocationFocus = view.findViewById(R.id.map_BTN_LocationFocus);
-        map_BTN_cancelparking = view.findViewById(R.id.map_BTN_cancelparking);
+        map_BTN_cancel = view.findViewById(R.id.map_BTN_cancel);
         map_BTN_parkingFocus = view.findViewById(R.id.map_BTN_parkingFocus);
         map_TV_distance = view.findViewById(R.id.map_TV_distance);
     }
@@ -122,7 +125,7 @@ public class Map_Fragment extends Fragment{
     private void iniViews() {
         map_BTN_LocationFocus.setOnClickListener(onClickFocusMyLocation);
         map_BTN_park.setOnClickListener(onClickPark);
-        map_BTN_cancelparking.setOnClickListener(onClickCancelparking);
+        map_BTN_cancel.setOnClickListener(onClickCancel);
         map_BTN_parkingFocus.setOnClickListener(onClickParkingFocus);
     }
 
@@ -164,9 +167,12 @@ public class Map_Fragment extends Fragment{
                 }
             });
             //setMyParking
-            myParkingMarker = loadParkingLocation(MY_PREFERENCE_PARKING);
+            if(myParkingMarker == null) {
+                myParkingMarker = loadParkingLocation(MY_PREFERENCE_PARKING);
+            }
         }
         isMapSetUp = true;
+        Log.d("pttt", "setupMap: MAP STARTED!");
     }
 
     private void enableMyLocation(GoogleMap map) {
@@ -175,14 +181,10 @@ public class Map_Fragment extends Fragment{
                 initCurrentLocation();
                 map.setMyLocationEnabled(true);
             }
-        } else {
-            // Permission to access the location is missing. Show rationale and request permission
-            requestPermision();
         }
     }
 
     private void setLocationSource(GoogleMap map) {
-
         map.setLocationSource(new LocationSource() {
             @Override
             public void activate(OnLocationChangedListener onLocationChangedListener) {
@@ -190,16 +192,14 @@ public class Map_Fragment extends Fragment{
                 registerLocationReceiver(locationReceiver);
                 Log.d("pttt", "activate: Tracking location");
             }
-
             @Override
             public void deactivate() {
-
                 locationChangedListener = null;
                 Log.d("pttt", "deactivate: stop tracking location");
                 MyLocationServices.getInstance().stopLocationUpdate(new MyLocationServices.CallBack_Location() {
                     @Override
                     public void locationReady(Location location) {
-                        registerLocationReceiver(locationReceiver);
+                        unRegisterLocationReceiver(locationReceiver);
                     }
 
                     @Override
@@ -209,6 +209,13 @@ public class Map_Fragment extends Fragment{
                 });
             }
         });
+    }
+
+    private void initMapFragment() {
+        if(googleMap != null && !isMapSetUp && gpsEnabled) {
+            setupMap(googleMap);
+            setLocationSource(googleMap);
+        }
     }
 
     private void onParkClick(String markerTitle, String markerIcon) {
@@ -233,6 +240,10 @@ public class Map_Fragment extends Fragment{
     }
 
     private Marker park(GoogleMap googleMap,LatLng location,String markerTitle,String markerIcon) {
+        /**
+         * Method receive map,latlng,marker title,marker icon -> method set new Parking marker,sets parking_state to PARKING and updateUI.
+         * Method return the added marker.
+         */
         Marker myParkMarker;
         parking_state = PARKING_STATE.PARKING;
         if(this.myParkingMarker == null) {
@@ -276,20 +287,23 @@ public class Map_Fragment extends Fragment{
     }
 
     private void updateUI() {
+        /**
+         * Method update UI by parking_state value.
+         */
         if(parking_state == PARKING_STATE.DRIVING) {
             ImgLoader.getInstance().loadImg("parking_btn_icon",map_BTN_park);
             //UI visibility
-            map_BTN_cancelparking.setVisibility(View.INVISIBLE);
-            map_BTN_cancelparking.setClickable(false);
+            map_BTN_cancel.setVisibility(View.INVISIBLE);
+            map_BTN_cancel.setClickable(false);
             map_BTN_parkingFocus.setVisibility(View.INVISIBLE);
-            map_BTN_cancelparking.setClickable(false);
+            map_BTN_cancel.setClickable(false);
             //remove parking marker
         }
 
         else if(parking_state == PARKING_STATE.PARKING || parking_state == PARKING_STATE.NAVIGATING) {
             // UI visibility
-            map_BTN_cancelparking.setVisibility(View.VISIBLE);
-            map_BTN_cancelparking.setClickable(true);
+            map_BTN_cancel.setVisibility(View.VISIBLE);
+            map_BTN_cancel.setClickable(true);
             map_BTN_parkingFocus.setVisibility(View.VISIBLE);
             map_BTN_parkingFocus.setClickable(true);
 
@@ -313,6 +327,8 @@ public class Map_Fragment extends Fragment{
         LatLng destination = myParkingMarker.getPosition();
         LatLng origin = myCurrentLocation;
         origin = new LatLng(32.05853290879904, 34.82934680220547);
+        //RouteBuilder2 routeBuilder2 = new RouteBuilder2(origin,destination,this.getActivity().getApplicationContext(),googleMap);
+        //routeBuilder2.buildRoute();
         drawRoute(origin,destination);
     }
 
@@ -326,6 +342,7 @@ public class Map_Fragment extends Fragment{
                     Log.d("pttt", "locationReady: currentLocation = "+latLng.toString());
                     if(myCurrentLocation == null) {
                         myCurrentLocation = latLng;
+
                         if(locationChangedListener!=null) {
                             locationChangedListener.onLocationChanged(location);
                         }
@@ -390,26 +407,40 @@ public class Map_Fragment extends Fragment{
         /**
          *         Asks the user do accept location permission.
          */
-        ActivityCompat.requestPermissions(this.getActivity(),new String[]
-                {Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        requestPermissions(new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+        }, MainActivity.MY_PERMISSIONS_REQUEST_LOCATION);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
-            return;
-        }
+        Log.d("pttt", "Map_Fragment - onRequestPermissionsResult:\t requestCode="+requestCode);
+        //this.getActivity().onRequestPermissionsResult(MainActivity.MY_PERMISSIONS_REQUEST_LOCATION, permissions,grantResults);
+        switch (requestCode) {
+            case MainActivity.MY_PERMISSIONS_REQUEST_LOCATION : {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    initMapFragment();
+                    Log.d("pttt", "onRequestPermissionsResult: APPROVE");
+                    MySignal.getInstance().toast("Permission granted");
 
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            // Enable the my location layer if the permission has been granted.
-            MySignal.getInstance().toast("Location permission denied!");
-            enableMyLocation(googleMap);
-        }
-        else {
-            // Permission was denied. Display an error message
-            // Display the missing permission error dialog when the fragments resume.
-            MySignal.getInstance().toast("Location permission approved.");
-            requestPermision();
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    Log.d("pttt", "onRequestPermissionsResult: DENY");
+                    MySignal.getInstance().toast("Permission denied");
+
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
         }
     }
 
@@ -448,7 +479,7 @@ public class Map_Fragment extends Fragment{
         /***
          * Method load parking marker and update parking_state,myParkingMarker and UI.
          * Method load parking marker from shared_preference and if it fails, method load parking marker from fire_base.
-         * if both loads fails method return null.
+         * if both loads fails method won't park and return null.
          */
         Marker marker = null;
         LatLng markerPos = localLoadParkingLocation(key);
@@ -467,12 +498,13 @@ public class Map_Fragment extends Fragment{
     private void registerLocationReceiver(LocationReceiver locationReceiver) {
         locationReceiver = new LocationReceiver(new LocationReceiver.CallBack_LatLngUpdate() {
             @Override
-            public void LatLngUpdate(LatLng latLng) {
+            public void latLngUpdate(LatLng latLng) {
                 myCurrentLocation = latLng;
                 Location location = new Location("");
                 location.setLatitude(latLng.latitude);
                 location.setLongitude(latLng.longitude);
                 locationChangedListener.onLocationChanged(location);
+                setFocus(myCurrentLocation,NORMAL_SCALE);
             }
         });
 
@@ -497,6 +529,12 @@ public class Map_Fragment extends Fragment{
     public void onResume() {
         super.onResume();
         Log.d("pttt", "MAP FRAGMENT- onResume: ");
+        if(MyLocationServices.getInstance().isGpsEnabled()) {
+            gpsEnabled = true;
+            if(MyLocationServices.getInstance().checkLocationPermission()) {
+                initMapFragment();
+            }
+        }
     }
 
     @Override
@@ -504,13 +542,10 @@ public class Map_Fragment extends Fragment{
         super.onStart();
         Log.d("pttt", "MAP FRAGMENT- onStart: ");
         if(MyLocationServices.getInstance().checkLocationPermission()) {
-            boolean gpsEnabled = isGpsEnabled();    //Ask to enable gps sensor if needed
-            if(googleMap != null && !isMapSetUp) {
-                setupMap(googleMap);
-                setLocationSource(googleMap);
+            if(googleMap != null) {
+                //setMyParking
+                myParkingMarker = loadParkingLocation(MY_PREFERENCE_PARKING);
             }
-        } else {
-            requestPermision();   //Ask for location permission
         }
     }
 
@@ -544,11 +579,11 @@ public class Map_Fragment extends Fragment{
         }
     };
 
-    private View.OnClickListener onClickCancelparking = new View.OnClickListener() {
+    private View.OnClickListener onClickCancel = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             if(parking_state == PARKING_STATE.PARKING) {
-                if(map_BTN_cancelparking.isClickable()) {
+                if(map_BTN_cancel.isClickable()) {
                     cancelParking();
                 }
             } else if(parking_state == PARKING_STATE.NAVIGATING) {
@@ -564,7 +599,7 @@ public class Map_Fragment extends Fragment{
         @Override
         public void onClick(View v) {
             if (myParkingMarker != null) {
-                setFocus(myParkingMarker.getPosition(), 15);
+                setFocus(myParkingMarker.getPosition(), SMALL_SCALE);
             }
         }
     };

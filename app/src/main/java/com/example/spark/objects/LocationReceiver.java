@@ -3,8 +3,6 @@ package com.example.spark.objects;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
-import android.location.LocationListener;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
@@ -15,7 +13,7 @@ public class LocationReceiver extends BroadcastReceiver {
     private CallBack_LatLngUpdate callBack_latLngUpdate;
 
     public interface CallBack_LatLngUpdate {
-        void LatLngUpdate(LatLng latLng);
+        void latLngUpdate(LatLng latLng);
     }
     public LocationReceiver(CallBack_LatLngUpdate callBack_latLngUpdate) {
         this.callBack_latLngUpdate = callBack_latLngUpdate;
@@ -27,7 +25,7 @@ public class LocationReceiver extends BroadcastReceiver {
         Gson gson = new Gson();
         LatLng currentLocation = gson.fromJson(latLng,LatLng.class);
         if(callBack_latLngUpdate!=null) {
-            callBack_latLngUpdate.LatLngUpdate(currentLocation);
+            callBack_latLngUpdate.latLngUpdate(currentLocation);
         }
     }
 }
