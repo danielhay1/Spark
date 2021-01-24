@@ -200,7 +200,9 @@ public class MainActivity extends AppCompatActivity{
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         Log.d("pttt", "MainActivity - onRequestPermissionsResult:\t requestCode="+requestCode);
-        switch (requestCode) {
+        final int unmaskedRequestCode = requestCode & 0x0000ffff;
+        Log.d("pttt", "MainActivity - onRequestPermissionsResult:\t UnMaskedRequestCode="+unmaskedRequestCode);
+        switch (unmaskedRequestCode) {
             case MY_PERMISSIONS_REQUEST_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0

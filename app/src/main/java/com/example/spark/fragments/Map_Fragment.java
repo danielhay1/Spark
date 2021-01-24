@@ -46,8 +46,9 @@ import com.google.android.gms.maps.model.Polyline;
 
 public class Map_Fragment extends Fragment{
 
+    private final int BIG_SCALE = 18;
     private final int NORMAL_SCALE = 17;
-    private final int SMALL_SCALE = 15;
+    private final int SMALL_SCALE = 16;
     private enum PARKING_STATE {
         DRIVING,
         PARKING,
@@ -69,12 +70,14 @@ public class Map_Fragment extends Fragment{
     private Marker myParkingMarker;
     private Marker myLocationMarker;
     private PARKING_STATE parking_state = PARKING_STATE.DRIVING;
+    private boolean autoFocusCurrentLocation;
 
     //Buttons
     private ImageView map_BTN_park;
     private ImageView map_BTN_LocationFocus;
     private ImageView map_BTN_cancel;
     private ImageView map_BTN_parkingFocus;
+    private ImageView map_BTN_FollowMyCurrentLocation;
     //EditText
     private TextView map_TV_distance;
 
@@ -120,6 +123,7 @@ public class Map_Fragment extends Fragment{
         map_BTN_cancel = view.findViewById(R.id.map_BTN_cancel);
         map_BTN_parkingFocus = view.findViewById(R.id.map_BTN_parkingFocus);
         map_TV_distance = view.findViewById(R.id.map_TV_distance);
+        map_BTN_FollowMyCurrentLocation = view.findViewById(R.id.map_BTN_FollowMyCurrentLocation);
     }
 
     private void iniViews() {
@@ -127,6 +131,7 @@ public class Map_Fragment extends Fragment{
         map_BTN_park.setOnClickListener(onClickPark);
         map_BTN_cancel.setOnClickListener(onClickCancel);
         map_BTN_parkingFocus.setOnClickListener(onClickParkingFocus);
+        map_BTN_FollowMyCurrentLocation.setOnClickListener(onAutoFocusMyLocation);
     }
 
     public void setupMap(GoogleMap map) {
@@ -160,10 +165,18 @@ public class Map_Fragment extends Fragment{
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            setFocus(marker.getPosition(), NORMAL_SCALE);
+                            marker.showInfoWindow();
                         }
                     }, 300);
                     return false;
+                }
+            });
+            map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                @Override
+                public void onMapClick(LatLng latLng) {
+                    if(myParkingMarker.isInfoWindowShown()){
+                        myParkingMarker.hideInfoWindow();
+                    }
                 }
             });
             //setMyParking
@@ -290,6 +303,7 @@ public class Map_Fragment extends Fragment{
         /**
          * Method update UI by parking_state value.
          */
+
         if(parking_state == PARKING_STATE.DRIVING) {
             ImgLoader.getInstance().loadImg("parking_btn_icon",map_BTN_park);
             //UI visibility
@@ -355,6 +369,14 @@ public class Map_Fragment extends Fragment{
                 Log.d("pttt", "onError: "+error);
             }
         });
+    }
+
+    private void followMyCurrentLocation() {
+        if(autoFocusCurrentLocation == false) {
+            ImgLoader.getInstance().loadImg("icon_mylocation_focus_gray",map_BTN_FollowMyCurrentLocation);
+        } else {
+            ImgLoader.getInstance().loadImg("icon_mylocation_focus",map_BTN_FollowMyCurrentLocation);
+        }
     }
 
     public void setFocus(LatLng focusLatlng, float scale) {
@@ -504,7 +526,9 @@ public class Map_Fragment extends Fragment{
                 location.setLatitude(latLng.latitude);
                 location.setLongitude(latLng.longitude);
                 locationChangedListener.onLocationChanged(location);
-                setFocus(myCurrentLocation,NORMAL_SCALE);
+                if(autoFocusCurrentLocation) {
+                    setFocus(myCurrentLocation,BIG_SCALE);
+                }
             }
         });
 
@@ -599,8 +623,20 @@ public class Map_Fragment extends Fragment{
         @Override
         public void onClick(View v) {
             if (myParkingMarker != null) {
-                setFocus(myParkingMarker.getPosition(), SMALL_SCALE);
+                setFocus(myParkingMarker.getPosition(),NORMAL_SCALE);
+                myParkingMarker.showInfoWindow();
             }
         }
     };
+
+    private View.OnClickListener onAutoFocusMyLocation = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            autoFocusCurrentLocation = !autoFocusCurrentLocation;
+            Log.d("pttt", "autoFocusCurrentLocation = "+autoFocusCurrentLocation);
+            followMyCurrentLocation();
+        }
+    };
+
+
 }
