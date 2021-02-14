@@ -19,7 +19,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.spark.R;
@@ -27,7 +26,10 @@ import com.example.spark.activiities.MainActivity;
 import com.example.spark.objects.RouteBuilder2;
 import com.example.spark.objects.RouteBulider;
 import com.example.spark.objects.LocationReceiver;
+import com.example.spark.objects.User;
+import com.example.spark.objects.Vehicle;
 import com.example.spark.untils.ImgLoader;
+import com.example.spark.untils.MyFireBaseServices;
 import com.example.spark.untils.MyLocationServices;
 import com.example.spark.untils.MyPreference;
 import com.example.spark.untils.MySignal;
@@ -42,6 +44,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
+import com.google.gson.Gson;
 
 
 public class Map_Fragment extends Fragment{
@@ -59,6 +62,7 @@ public class Map_Fragment extends Fragment{
     private final String CAR_ICON = "car_png_marker";
     private final String MY_PREFERENCE_PARKING = "parking_marker";
 
+    private User user;
     //map
     private GoogleMap googleMap;
     private boolean isMapSetUp = false;
@@ -97,6 +101,7 @@ public class Map_Fragment extends Fragment{
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         findViews(view);
+        getUser();
         SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.google_maps);
         supportMapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
@@ -174,7 +179,7 @@ public class Map_Fragment extends Fragment{
             map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                 @Override
                 public void onMapClick(LatLng latLng) {
-                    if(myParkingMarker.isInfoWindowShown()){
+                    if(myParkingMarker!=null && myParkingMarker.isInfoWindowShown()){
                         myParkingMarker.hideInfoWindow();
                     }
                 }
@@ -371,14 +376,6 @@ public class Map_Fragment extends Fragment{
         });
     }
 
-    private void followMyCurrentLocation() {
-        if(autoFocusCurrentLocation == false) {
-            ImgLoader.getInstance().loadImg("icon_mylocation_focus_gray",map_BTN_FollowMyCurrentLocation);
-        } else {
-            ImgLoader.getInstance().loadImg("icon_mylocation_focus",map_BTN_FollowMyCurrentLocation);
-        }
-    }
-
     public void setFocus(LatLng focusLatlng, float scale) {
         CameraUpdate center = CameraUpdateFactory.newLatLng(focusLatlng);
         if(focusLatlng == null) {
@@ -467,13 +464,36 @@ public class Map_Fragment extends Fragment{
     }
 
 
+    private void getUser() {
+        Gson gson = new Gson();
+        String jsonUser = getArguments().getString(MainActivity.USER_INTENT);
+        User user = gson.fromJson(jsonUser,User.class);
+        if(user == null) {
+            Log.d("pttt", "getUser: \t USER IS NULL!");
+        }
+        else {
+            this.user = user;
+            Log.d("pttt", "getUser: \tUID = "+user.getUid());
+        }
+    }
+
+
     //Load & Save Methdos.
     private void localSaveParkingLocation(String key, LatLng markerPos) {
         MyPreference.getInstance().putObject(key,markerPos);
     }
 
-    private void onlineSaveParkingLocation(String key, LatLng markerPos) {
-        //firebase save LatLang
+    private void onlineSaveParkingLocation(LatLng markerPos) {
+        //firebase updateVehicle LatLang
+        if(user.getVehicleID()!=null) {
+            MyFireBaseServices.getInstance().loadVehicleFromFireBase(user.getVehicleID(), new MyFireBaseServices.CallBack_LoadVehicle() {
+                @Override
+                public void vehicleDetailsUpdated(Vehicle result) {
+                    result.setParkingLocation(markerPos);
+                    MyFireBaseServices.getInstance().saveVehicleToFireBase(result);
+                }
+            });
+        }
     }
 
     private void saveParkingLocation(String key, LatLng markerPos) {
@@ -481,7 +501,7 @@ public class Map_Fragment extends Fragment{
          * Method save local and online parking marker position
          */
         localSaveParkingLocation(key,markerPos);    //Local save parking using shared_preference.
-        onlineSaveParkingLocation(key,markerPos);   //Online save parking using fire_base.
+        onlineSaveParkingLocation(markerPos);   //Online save parking using fire_base.
     }
 
     private LatLng localLoadParkingLocation(String key) {
@@ -489,7 +509,16 @@ public class Map_Fragment extends Fragment{
     }
     
     private LatLng onlineLoadParkingLocation(String key) {
+        //FIX NEEDED!!!
         LatLng markerPos = null;
+/*        if(user.getVehicleID()!=null) {
+            MyFireBaseServices.getInstance().loadVehicleFromFireBase(user.getVehicleID(), new MyFireBaseServices.CallBack_LoadVehicle() {
+                @Override
+                public void vehicleDetailsUpdated(Vehicle result) {
+                    LatLng markerPos = result.getParkingLocation();
+                }
+            });
+        }*/
         return markerPos;
     }
 
@@ -525,7 +554,9 @@ public class Map_Fragment extends Fragment{
                 Location location = new Location("");
                 location.setLatitude(latLng.latitude);
                 location.setLongitude(latLng.longitude);
-                locationChangedListener.onLocationChanged(location);
+                if(locationChangedListener!=null) {
+                    locationChangedListener.onLocationChanged(location);
+                }
                 if(autoFocusCurrentLocation) {
                     setFocus(myCurrentLocation,BIG_SCALE);
                 }
@@ -634,7 +665,11 @@ public class Map_Fragment extends Fragment{
         public void onClick(View v) {
             autoFocusCurrentLocation = !autoFocusCurrentLocation;
             Log.d("pttt", "autoFocusCurrentLocation = "+autoFocusCurrentLocation);
-            followMyCurrentLocation();
+            if(autoFocusCurrentLocation == false) {
+                ImgLoader.getInstance().loadImg("icon_mylocation_focus_gray",map_BTN_FollowMyCurrentLocation);
+            } else {
+                ImgLoader.getInstance().loadImg("icon_mylocation_focus",map_BTN_FollowMyCurrentLocation);
+            }
         }
     };
 

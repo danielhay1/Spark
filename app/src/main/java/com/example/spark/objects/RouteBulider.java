@@ -17,6 +17,7 @@ import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.DirectionsStep;
 import com.google.maps.model.EncodedPolyline;
+import com.google.maps.model.TravelMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,9 +39,16 @@ public class RouteBulider {
     }
 
     private List<LatLng> calcRoute() {
+        //FIX!
         GeoApiContext context = new GeoApiContext.Builder()
                 .apiKey(appContext.getString(R.string.api_key))
                 .build();
+/*        DirectionsApiRequest req = DirectionsApi.newRequest(context)
+                .mode(TravelMode.WALKING)
+                .origin(String.valueOf(origin))
+                .destination(String.valueOf(destination));
+        Log.d("pttt", "calcRoute: "+String.valueOf(destination)
+        );*/
         DirectionsApiRequest req = DirectionsApi.getDirections(context, stringLatLng(origin), stringLatLng(destination));
         try {
             DirectionsResult res = req.await();

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.example.spark.objects.User;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.gson.Gson;
@@ -12,16 +13,15 @@ public class MyPreference {
     private static MyPreference instance;
     private SharedPreferences sharedPreferences;
 
-    public interface KEYS {
-        public static final String TOP_SCORES_ARRAY = "topScores";
-    }
+    private final String MY_PARKINGLOCATION = "my_parking_location";
+
     public static MyPreference getInstance() {
         //Singleton design pattern
         return instance;
     }
 
     private MyPreference(Context appContext) {
-        sharedPreferences = appContext.getSharedPreferences("myPreference",Context.MODE_PRIVATE);
+        sharedPreferences = appContext.getSharedPreferences(MY_PARKINGLOCATION,Context.MODE_PRIVATE);
     }
 
     public static void Init(Context appContext) {
@@ -61,7 +61,6 @@ public class MyPreference {
         Gson gson = new Gson();
         return gson.fromJson(getString(key), LatLng.class);
     }
-
 
     public void deleteKey(String key) {
         Log.d("pttt", "deleteKey");

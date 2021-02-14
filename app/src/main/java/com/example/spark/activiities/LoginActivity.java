@@ -3,17 +3,14 @@ package com.example.spark.activiities;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.animation.Animator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.LinearInterpolator;
 
 import com.example.spark.R;
-import com.example.spark.objects.MyFireBaseServices;
+import com.example.spark.untils.MyFireBaseServices;
 import com.example.spark.untils.MySignal;
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;

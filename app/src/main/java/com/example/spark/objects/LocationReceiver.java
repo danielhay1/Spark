@@ -24,7 +24,7 @@ public class LocationReceiver extends BroadcastReceiver {
         String latLng = intent.getStringExtra(LOCATION);
         Gson gson = new Gson();
         LatLng currentLocation = gson.fromJson(latLng,LatLng.class);
-        if(callBack_latLngUpdate!=null) {
+        if(callBack_latLngUpdate!=null && currentLocation!=null) {
             callBack_latLngUpdate.latLngUpdate(currentLocation);
         }
     }

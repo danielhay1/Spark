@@ -5,16 +5,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.spark.R;
 import com.example.spark.objects.User;
+import com.example.spark.objects.Vehicle;
+import com.example.spark.untils.MyFireBaseServices;
 import com.example.spark.untils.MySignal;
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,12 +24,14 @@ public class UpdateUserActivity extends AppCompatActivity {
     private com.google.android.material.button.MaterialButton updateUser_BTN_apply;
 
     private User user;
+    private Vehicle vehicle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_user);
         getUser();
+        this.vehicle = new Vehicle();
         findView();
         initView();
     }
@@ -46,16 +47,25 @@ public class UpdateUserActivity extends AppCompatActivity {
         updateUser_BTN_apply.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean res = updateUser();
+                boolean res = updateDetails();
                 if(res == true) {
+                    //save to firebase
                     MySignal.getInstance().toast("User updated!");
                     finish();
                 }
                 else {
-                    MySignal.getInstance().toast("All fields are empty, to apply fill at least one field.");
+                    MySignal.getInstance().toast("One or more fields are empty or wrong value inserted, to apply fill all fields.");
                 }
             }
         });
+    }
+
+    private void saveUserChanges(User user, Vehicle vehicle) {
+        /**
+         * Method user changes to firebase
+         */
+        MyFireBaseServices.getInstance().saveVehicleToFireBase(vehicle);
+        MyFireBaseServices.getInstance().saveUserToFireBase(user);
     }
 
     private void getUser() {
@@ -74,32 +84,55 @@ public class UpdateUserActivity extends AppCompatActivity {
         }
     }
 
-    private boolean updateUser() {
-        //checks all EDT if EDT received text isnt null update user value
+    private boolean updateDetails() {
         String name = updateUser_EDT_name.getText().toString();
         String vehicleNumber = updateUser_EDT_vehicleNumber.getText().toString();
         String VehicleNick = updateUser_EDT_vehicleNick.getText().toString();
-        boolean updatesResults[] = new boolean[3];
-        updatesResults[0] = updateValue("name",name);
-        updatesResults[1] = updateValue("Vehicle number",vehicleNumber);
-        updatesResults[2] =updateValue("Vehicle nickname",VehicleNick);
-        for (boolean res:updatesResults) {
-            if(res == true) {
-                return true;
+        boolean userUpdated = updateUser(name,vehicleNumber);
+        if(userUpdated) {
+            Vehicle vehicle = createVehicle(vehicleNumber,VehicleNick);
+            if(!vehicle.isOwnedBy(user.getUid())) {
+                vehicle.addOwner(user.getUid());
+                saveUserChanges(user, vehicle);
             }
         }
-        return false;
+        return userUpdated;
+    }
+
+    private boolean updateUser(String name, String vehicleNumber) {
+        //check if inserted values are legal
+        boolean updatesResults[] = new boolean[2];
+        updatesResults[0] = updateValue("name",name);
+        updatesResults[1] = updateValue("Vehicle number",vehicleNumber);
+        return updatesResults[0] && updatesResults[1];
+    }
+
+    private Vehicle createVehicle(String vehicleNumber, String vehicleNick) {
+        /**
+         * Method load vehicle from DB, if vehicle_number is in DB method update vehicle nick
+         * if vehicle_number isn't in the DB, creates new vehicle and insert it to DB.
+         */
+        if(vehicleNick.equalsIgnoreCase("")) {
+            Log.d("pttt", "createVehicle: no car nickname inserted");
+        }
+        else {
+            vehicleNick = "myCar";
+        }
+        Vehicle vehicle = new Vehicle()
+                .setVehicleID(vehicleNumber)
+                .setVehicleNick(vehicleNick);
+        vehicle.addOwner(user.getUid());
+        return vehicle;
     }
 
     private boolean updateValue(String valType, String value) {
         if(!value.equalsIgnoreCase("")) {
             if(valType == "name") {
-                //validInputCheck("[A-Za-z]+",value)
+                validInputCheck("[A-Za-z]+",value);
                 user.setName(value);
             } else if(valType.equalsIgnoreCase("Vehicle number")) {
-                user.getVehicle().setVehicleLicenceNumber(value);
-            } else if(valType.equalsIgnoreCase("Vehicle nickname")) {
-                user.getVehicle().setVehicleNick(value);
+                validInputCheck("[0-9]+",value);
+                user.setVehicleID(value);
             }
             return true;
         } else {

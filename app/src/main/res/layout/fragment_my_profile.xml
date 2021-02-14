@@ -64,6 +64,15 @@
                 android:textColor="@color/white"
                 android:textSize="10pt" />
 
+            <TextView
+                android:id="@+id/myprofile_TV_vehicleOwners"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="34dp"
+                android:text="Vehicle owners:"
+                android:textColor="@color/white"
+                android:textSize="10pt" />
+
         </LinearLayout>
         <com.google.android.material.button.MaterialButton
             android:id="@+id/updateUser_BTN_editProfile"

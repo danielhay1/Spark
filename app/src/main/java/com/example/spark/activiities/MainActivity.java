@@ -2,7 +2,6 @@ package com.example.spark.activiities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
 import android.content.DialogInterface;
@@ -12,8 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.example.spark.R;
-import com.example.spark.fragments.MyProfileFragment;
-import com.example.spark.objects.MyFireBaseServices;
+import com.example.spark.untils.MyFireBaseServices;
 import com.example.spark.objects.PagerAdapter;
 import com.example.spark.objects.User;
 import com.example.spark.objects.Vehicle;
@@ -22,9 +20,6 @@ import com.example.spark.untils.GpsTracker_service;
 import com.example.spark.untils.MySignal;
 import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.gson.Gson;
 
 
@@ -46,11 +41,9 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
         if(fireBaseLogin()) {   //FireBase login
             findViews();
-            createUser();
+            logIn();
             initNavBar();
         }
-
-
 /*        findViews();            //without firebase connection
         initNavBar();*/
     }
@@ -95,15 +88,11 @@ public class MainActivity extends AppCompatActivity{
          * function check if user login to system, if not intent login activity.
          * if user is login Method returns true, else Method returns false.
          */
-        boolean loginSuccess;
-        if(!MyFireBaseServices.getInstance().isLogin()) {
-            loginSuccess = false;
+        boolean loginSuccess = MyFireBaseServices.getInstance().login();
+        if(!loginSuccess) {
             Intent myIntent = new Intent(this,LoginActivity.class);
             startActivity(myIntent);
             finish();
-        } else {
-            loginSuccess = true;
-
         }
         return loginSuccess;
     }
@@ -117,17 +106,47 @@ public class MainActivity extends AppCompatActivity{
                 .setUid(MyFireBaseServices.getInstance().getUID())
                 .setName(MyFireBaseServices.getInstance().getUserName())
                 .setPhone(MyFireBaseServices.getInstance().getUserPhone())
-                .setVehicle(vehicle);
+                .setVehicleID("");
     }
 
-    private void createUser() {
+    private void logIn() {
+        user = new User()
+                .setUid(MyFireBaseServices.getInstance().getUID())
+                .setName(MyFireBaseServices.getInstance().getUserName())
+                .setPhone(MyFireBaseServices.getInstance().getUserPhone())
+                .setVehicleID("");
+        MyFireBaseServices.getInstance().loadUserFromFireBase(user.getUid(), new MyFireBaseServices.CallBack_LoadUser() {
+            @Override
+            public void userDetailsUpdated(User result) {
+                if(result != null) {
+                    setUser(result);
+                } else {
+                    detailUpdateAsk();
+                }
+            }
+        });
+
+    }
+
+    private void setUser(User user) {
+        this.user = user;
+    }
+
+/*    private void createUser() {
         Vehicle vehicle = new Vehicle();
         user = new User()
                 .setUid(MyFireBaseServices.getInstance().getUID())
                 .setName(MyFireBaseServices.getInstance().getUserName())
                 .setPhone(MyFireBaseServices.getInstance().getUserPhone())
-                .setVehicle(vehicle);
+                .setVehicleID("");
         detailUpdateAsk();
+    }*/
+
+    private void loadUser() {
+        /**
+         * Method search Uid on firebase if found load the user if not creates new user and asks to update details
+         */
+
     }
 
     private boolean isNewUser() {

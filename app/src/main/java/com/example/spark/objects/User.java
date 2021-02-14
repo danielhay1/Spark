@@ -4,7 +4,7 @@ public class User {
     private String uid = "";
     private String name = "";
     private String phone = "";
-    private Vehicle vehicle = null;
+    private String vehicleID = "";
 
     public User() { }
 
@@ -35,12 +35,12 @@ public class User {
         return this;
     }
 
-    public Vehicle getVehicle() {
-        return vehicle;
+    public String getVehicleID() {
+        return vehicleID;
     }
 
-    public User setVehicle(Vehicle vehicle) {
-        this.vehicle = vehicle;
+    public User setVehicleID(String vehicleID) {
+        this.vehicleID = vehicleID;
         return this;
     }
 
