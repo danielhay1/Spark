@@ -60,7 +60,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_weight="1"
                 android:ems="10"
-                android:hint="Vehicle nickname"
+                android:hint="Vehicle nickname\n*(Only in case of non-existent vehicle)"
                 android:textAlignment="center"
                 android:textColor="@color/white"
                 android:textColorHint="@color/light_blue" />

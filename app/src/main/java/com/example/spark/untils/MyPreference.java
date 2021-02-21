@@ -32,41 +32,47 @@ public class MyPreference {
     }
 
     public void putString(String key, String value) {
-        Log.d("pttt", "putString");
+        Log.d("pttt", "putString \tkey= "+key+", Value= "+value);
         SharedPreferences.Editor editor  = sharedPreferences.edit();
         editor.putString(key, value);
         editor.apply();
     }
 
     public String getString(String key) {
-        Log.d("pttt", "getString");
+        Log.d("pttt", "getString ,key= "+key);
         return sharedPreferences.getString(key,"");
     }
 
     public void putObject(String key, Object object) {
-        Log.d("pttt", "putObject");
+        Log.d("pttt", "putObject \tkey= "+key+", Object= "+object);
         Gson gson = new Gson();
         String jsonElement = gson.toJson(object);
         this.putString(key, jsonElement);
+        Log.d("pttt", "putObject: show all " + prefernceToString());
     }
 
     public Object getObject(String key) {
-        Log.d("pttt", "getObject");
+        Log.d("pttt", "getObject, key= "+key);
         Gson gson = new Gson();
         return gson.fromJson(getString(key),Object.class);
     }
 
     public Object getLatLng(String key) {
-        Log.d("pttt", "getObject");
+        Log.d("pttt", "getLatLng, key= "+key);
         Gson gson = new Gson();
         return gson.fromJson(getString(key), LatLng.class);
     }
 
     public void deleteKey(String key) {
-        Log.d("pttt", "deleteKey");
+        Log.d("pttt", "deleteKey, key= "+key);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(key);
         editor.apply();
+        Log.d("pttt", "putObject: show all " + prefernceToString());
+    }
+
+    public String prefernceToString() {
+        return this.sharedPreferences.getAll().toString();
     }
 
     public void deleteAllData() {

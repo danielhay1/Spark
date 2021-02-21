@@ -29,50 +29,134 @@
             android:layout_weight="6"
             android:gravity="left"
             android:orientation="vertical">
-            <TextView
-                android:id="@+id/myprofile_TV_name"
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="User name:"
-                android:textColor="@color/white"
-                android:textSize="10pt" />
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="1dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="User name:"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:textSize="10pt" />
 
-            <TextView
-                android:id="@+id/myprofile_TV_PhoneNumber"
+                <TextView
+                    android:id="@+id/myprofile_TV_name"
+                    android:layout_width="1dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:text="-"
+                    android:textColor="@color/white"
+                    android:textSize="10pt" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="34dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="1dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Phone number:"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:textSize="10pt" />
+
+                <TextView
+                    android:id="@+id/myprofile_TV_PhoneNumber"
+                    android:layout_width="1dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:text="-"
+                    android:textColor="@color/white"
+                    android:textSize="10pt" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="34dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="1dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Vehicle number:"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:textSize="10pt" />
+
+                <TextView
+                    android:id="@+id/myprofile_TV_vehicleNumber"
+                    android:layout_width="1dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:text="-"
+                    android:textColor="@color/white"
+                    android:textSize="10pt" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="34dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="1dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Vehicle nickname:"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:textSize="10pt" />
+
+                <TextView
+                    android:id="@+id/myprofile_TV_vehicleNick"
+                    android:layout_width="1dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:text="-"
+                    android:textColor="@color/white"
+                    android:textSize="10pt" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="34dp"
-                android:text="Phone number:"
-                android:textColor="@color/white"
-                android:textSize="10pt" />
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="1dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Vehicle owners:"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:textSize="10pt" />
 
-            <TextView
-                android:id="@+id/myprofile_TV_vehicleNumber"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="34dp"
-                android:text="Vehicle number: "
-                android:textColor="@color/white"
-                android:textSize="10pt" />
-
-            <TextView
-                android:id="@+id/myprofile_TV_vehicleNick"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="34dp"
-                android:text="Vehicle nickname:"
-                android:textColor="@color/white"
-                android:textSize="10pt" />
-
-            <TextView
-                android:id="@+id/myprofile_TV_vehicleOwners"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="34dp"
-                android:text="Vehicle owners:"
-                android:textColor="@color/white"
-                android:textSize="10pt" />
-
+                <TextView
+                    android:id="@+id/myprofile_TV_vehicleOwners"
+                    android:layout_width="1dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:text="( )"
+                    android:textColor="@color/white"
+                    android:textSize="10pt" />
+            </LinearLayout>
         </LinearLayout>
         <com.google.android.material.button.MaterialButton
             android:id="@+id/updateUser_BTN_editProfile"

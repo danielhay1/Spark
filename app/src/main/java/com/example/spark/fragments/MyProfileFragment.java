@@ -1,5 +1,6 @@
 package com.example.spark.fragments;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -31,10 +32,10 @@ public class MyProfileFragment extends Fragment {
     private TextView myprofile_TV_vehicleNick;
     private TextView myprofile_TV_vehicleOwners;
     private com.google.android.material.button.MaterialButton myprofile_BTN_logout;
-
     private com.google.android.material.button.MaterialButton updateUser_BTN_editProfile;
     private User user;
     private Vehicle vehicle;
+    private boolean isFragmentCreated = false;
 
 
     @Override
@@ -45,8 +46,8 @@ public class MyProfileFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_my_profile, container, false);
-        getUser();
         findViews(view);
+        getUser();
         initViews();
 
         return view;
@@ -60,6 +61,7 @@ public class MyProfileFragment extends Fragment {
         myprofile_TV_vehicleNumber = view.findViewById(R.id.myprofile_TV_vehicleNumber);
         myprofile_TV_vehicleNick = view.findViewById(R.id.myprofile_TV_vehicleNick);
         myprofile_TV_vehicleOwners = view.findViewById(R.id.myprofile_TV_vehicleOwners);
+        isFragmentCreated = true;
     }
 
     private void initViews() {
@@ -76,23 +78,53 @@ public class MyProfileFragment extends Fragment {
                 String jsonUser = getJsonUser(user);
                 Intent intent = new Intent(getActivity(), UpdateUserActivity.class);
                 intent.putExtra(MainActivity.USER_INTENT,jsonUser);
-                startActivity(intent);
+                startActivityForResult(intent, MainActivity.UPDATE_USER);
             }
         });
     }
 
     private void getUser() {
-        Gson gson = new Gson();
-        String jsonUser = getArguments().getString(MainActivity.USER_INTENT);
-        User user = gson.fromJson(jsonUser,User.class);
-        if(user == null) {
-            Log.d("pttt", "getUser: \t USER IS NULL!");
-        }
-        else {
-            this.user = user;
-            Log.d("pttt", "getUser: \tUID = "+user.getUid());
+        if(user == null || user.getConnectedVehicleID().equalsIgnoreCase("")) {
+            user = new User()
+                    .setUid(MyFireBaseServices.getInstance().getUID())
+                    .setName(MyFireBaseServices.getInstance().getUserName())
+                    .setPhone(MyFireBaseServices.getInstance().getUserPhone())
+                    .setConnectedVehicleID("");
+
+            Gson gson = new Gson();
+            if (getArguments() == null) {
+                getUserFromFireBase(user.getUid());
+            } else {
+                String jsonUser = getArguments().getString(MainActivity.USER_INTENT);
+                User loadedJsonUser = gson.fromJson(jsonUser, User.class);
+                if (loadedJsonUser == null) {
+                    Log.d("pttt", "getUser: \t USER IS NULL!");
+                } else {
+                    this.user = loadedJsonUser;
+                    Log.d("pttt", "getUser: \tUID = " + user);
+                }
+            }
         }
     }
+
+    private void getUserFromFireBase(String uid) {
+        MyFireBaseServices.getInstance().loadUserFromFireBase(uid, new MyFireBaseServices.CallBack_LoadUser() {
+            @Override
+            public void userDetailsUpdated(User result) {
+                if(result != null) {
+                    user = result;
+                    Log.d("pttt", "userDetailsUpdated: \n"+user);
+                    //setUserDetails
+                    updateUserData();
+                }
+            }
+            @Override
+            public void loadFailed(Exception e) {
+                Log.d("pttt", "loadFailed: Failed to read value "+e.getMessage());
+            }
+        });
+    }
+
 
     private String getJsonUser (User user){
         Gson gson = new Gson();
@@ -104,33 +136,68 @@ public class MyProfileFragment extends Fragment {
         if(user != null) {
             updateField(user.getName(),myprofile_TV_name);
             updateField(user.getPhone(),myprofile_TV_PhoneNumber);
-            updateField(user.getVehicleID(),myprofile_TV_vehicleNumber);
+            updateField(user.getConnectedVehicleID(),myprofile_TV_vehicleNumber);
 
 
-            MyFireBaseServices.getInstance().loadVehicleFromFireBase(user.getVehicleID(), new MyFireBaseServices.CallBack_LoadVehicle() {
+            MyFireBaseServices.getInstance().loadVehicleFromFireBase(user.getConnectedVehicleID(), new MyFireBaseServices.CallBack_LoadVehicle() {
                 @Override
                 public void vehicleDetailsUpdated(Vehicle result) {
                     vehicle = result;
+                    if(vehicle != null) {
+                        String ownersName = vehicle.ownersNamesToString();
+                        //Log.d("pttt", "owners = "+ownersName);
+                        updateField(vehicle.getVehicleNick(),myprofile_TV_vehicleNick);
+                        updateField(ownersName,myprofile_TV_vehicleOwners);
+                    }
+                    else {
+                        updateField("",myprofile_TV_vehicleNick);
+                        updateField("",myprofile_TV_vehicleOwners);
+                    }
+                }
+
+                @Override
+                public void loadFailed(Exception e) {
+                    Log.d("pttt", "loadFailed: Failed to read value "+e.getMessage());
+                    updateField("",myprofile_TV_vehicleNick);
+                    updateField("",myprofile_TV_vehicleOwners);
                 }
             });
-            if(vehicle != null) {
-                updateField(vehicle.getVehicleNick(),myprofile_TV_vehicleNick);
-                updateField(vehicle.getOwnersName(),myprofile_TV_vehicleOwners);
-            }
-            else {
-                updateField("",myprofile_TV_vehicleNick);
-                updateField("",myprofile_TV_vehicleOwners);
-            }
+
 
         }
     }
 
-    private void updateField(String value, TextView textView) {
-        if(value.equalsIgnoreCase("")) {
-            textView.setText(textView.getText() + " - ");
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        int userRequest = MainActivity.UPDATE_USER;
+        Log.d("pttt", "onActivityResult (MyProfileFragment): request= "+requestCode +", result= "+resultCode);
+        if (requestCode == userRequest) {
+            if(resultCode == Activity.RESULT_OK){
+                String result=data.getStringExtra(MainActivity.USER_INTENT);
+                Gson gson = new Gson();
+                user = gson.fromJson(result,User.class);
+                Log.d("pttt", "onActivityResult (MyProfileFragment): user updated, user ="+user);
+                if(isFragmentCreated) {
+                    updateUserData();
+                }
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                Log.d("pttt", "onActivityResult (MyProfileFragment): user isn't updated.");
+            }
         }
-        else {
-            textView.setText(textView.getText() + " " + value);
+    }
+
+    private void updateField(String value, TextView textView) {
+        if(textView!=null) {
+            if(value.equalsIgnoreCase("")||value == null) {
+                textView.setText("-");
+            }
+            else {
+                textView.setText("" + value);
+            }
+        } else {
+            Log.d("pttt", "updateField: textview is null");
         }
     }
 
@@ -141,5 +208,12 @@ public class MyProfileFragment extends Fragment {
         getActivity().finish();
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        if(user==null || user.getConnectedVehicleID().equalsIgnoreCase("")) {
+            getUser();
+        }
+    }
 }
 

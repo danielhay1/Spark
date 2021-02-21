@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -26,6 +27,8 @@ import com.google.gson.Gson;
 public class MainActivity extends AppCompatActivity{
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
+    public static final int UPDATE_USER = 2;
+
     public final static String USER_INTENT = "user";
     private TabLayout main_NAVBAR;
     private TabItem main_NAVBAR_main,main_NAVBAR_history,main_NAVBAR_profile;
@@ -34,14 +37,13 @@ public class MainActivity extends AppCompatActivity{
     private User user;
     private boolean isLocationTrakerOn;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         if(fireBaseLogin()) {   //FireBase login
             findViews();
-            logIn();
+            loadUser();
             initNavBar();
         }
 /*        findViews();            //without firebase connection
@@ -58,8 +60,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void initNavBar() {
-        Bundle bundle = this.sendUserToFragment();
-        pagerAdapter = new PagerAdapter(getSupportFragmentManager(),main_NAVBAR.getTabCount(),bundle);
+        pagerAdapter = new PagerAdapter(getSupportFragmentManager(),main_NAVBAR.getTabCount());
         main_VIEWPAGER.setAdapter(pagerAdapter);
 
         //change the tabs view when the tab is clicked.
@@ -80,7 +81,6 @@ public class MainActivity extends AppCompatActivity{
             }
         });
         main_VIEWPAGER.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(main_NAVBAR));
-        //EnableMyLocationServices();
     }
 
     private boolean fireBaseLogin() {
@@ -106,47 +106,46 @@ public class MainActivity extends AppCompatActivity{
                 .setUid(MyFireBaseServices.getInstance().getUID())
                 .setName(MyFireBaseServices.getInstance().getUserName())
                 .setPhone(MyFireBaseServices.getInstance().getUserPhone())
-                .setVehicleID("");
+                .setConnectedVehicleID("");
     }
 
-    private void logIn() {
-        user = new User()
-                .setUid(MyFireBaseServices.getInstance().getUID())
-                .setName(MyFireBaseServices.getInstance().getUserName())
-                .setPhone(MyFireBaseServices.getInstance().getUserPhone())
-                .setVehicleID("");
-        MyFireBaseServices.getInstance().loadUserFromFireBase(user.getUid(), new MyFireBaseServices.CallBack_LoadUser() {
-            @Override
-            public void userDetailsUpdated(User result) {
-                if(result != null) {
-                    setUser(result);
-                } else {
-                    detailUpdateAsk();
-                }
-            }
-        });
-
-    }
 
     private void setUser(User user) {
         this.user = user;
     }
 
-/*    private void createUser() {
-        Vehicle vehicle = new Vehicle();
-        user = new User()
-                .setUid(MyFireBaseServices.getInstance().getUID())
-                .setName(MyFireBaseServices.getInstance().getUserName())
-                .setPhone(MyFireBaseServices.getInstance().getUserPhone())
-                .setVehicleID("");
-        detailUpdateAsk();
-    }*/
-
     private void loadUser() {
         /**
          * Method search Uid on firebase if found load the user if not creates new user and asks to update details
          */
+        Log.d("pttt", "loadUser:");
+        user = new User()
+                .setUid(MyFireBaseServices.getInstance().getUID())
+                .setName(MyFireBaseServices.getInstance().getUserName())
+                .setPhone(MyFireBaseServices.getInstance().getUserPhone())
+                .setConnectedVehicleID("");
+        MyFireBaseServices.getInstance().loadUserFromFireBase(user.getUid(), new MyFireBaseServices.CallBack_LoadUser() {
+            @Override
+            public void userDetailsUpdated(User result) {
+                if(result != null) {
+                    setUser(result);
+                    Log.d("pttt", "userDetailsUpdated: \n"+user);
+                } else {
+                    detailUpdateAsk();
+                }
+                //Send user to all fragments.
+                Bundle bundle = sendUserToFragment();
+                pagerAdapter.initBundle(bundle);
+            }
 
+            @Override
+            public void loadFailed(Exception e) {
+                Log.d("pttt", "loadFailed: Failed to read value "+e.getMessage());
+                Bundle bundle = sendUserToFragment();
+                pagerAdapter.initBundle(bundle);
+            }
+
+        });
     }
 
     private boolean isNewUser() {
@@ -174,14 +173,33 @@ public class MainActivity extends AppCompatActivity{
                             String jsonUser = getJsonUser(user);
                             Intent intent = new Intent(MainActivity.this, UpdateUserActivity.class);
                             intent.putExtra(USER_INTENT,jsonUser);
-                            startActivity(intent);
+                            startActivityForResult(intent, UPDATE_USER);
                         }
                     });
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        final int unmaskedRequestCode = requestCode & 0x0000ffff;
+        Log.d("pttt", "onActivityResult: request= "+requestCode +", result= "+resultCode +",UnMaskedRequestCode= "+unmaskedRequestCode);
+        if (unmaskedRequestCode == UPDATE_USER) {
+            if(resultCode == Activity.RESULT_OK){
+                String result=data.getStringExtra(USER_INTENT);
+                Gson gson = new Gson();
+                user = gson.fromJson(result,User.class);
+                Log.d("pttt", "onActivityResult: user updated, user = "+user);
+                pagerAdapter.onActivityResult(unmaskedRequestCode,resultCode,data);
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                Log.d("pttt", "onActivityResult: user isn't updated.");
+            }
+        }
+    }//onActivityResult
+
     private Bundle sendUserToFragment() {
-        String jsonUser = getJsonUser(user);
+        String jsonUser = getJsonUser(this.user);
         Bundle bundle = new Bundle();
         bundle.putString(USER_INTENT,jsonUser);
         return bundle;
@@ -190,6 +208,7 @@ public class MainActivity extends AppCompatActivity{
     private String getJsonUser (User user){
         Gson gson = new Gson();
         String jsonUser = gson.toJson(user);
+        Log.d("pttt", "getJsonUser: "+ user);
         return jsonUser;
     }
 
@@ -252,6 +271,7 @@ public class MainActivity extends AppCompatActivity{
         super.onStart();
         Log.d("pttt", "onStart: ");
         if(!isLocationTrakerOn) {
+            EnableMyLocationServices();
             EnableMyLocationServices();
         }
     }
