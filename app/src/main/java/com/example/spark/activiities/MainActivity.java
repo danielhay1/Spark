@@ -48,8 +48,6 @@ public class MainActivity extends AppCompatActivity implements MyProfileFragment
             loadUser();
             initNavBar();
         }
-/*        findViews();            //without firebase connection
-        initNavBar();*/
     }
 
     private void findViews() {
@@ -277,6 +275,13 @@ public class MainActivity extends AppCompatActivity implements MyProfileFragment
     }
 
     @Override
+    public void onBackPressed() {
+        if(pagerAdapter.onMapFragmentBackPress()){
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         Log.d("pttt", "onStart: ");
@@ -309,4 +314,6 @@ public class MainActivity extends AppCompatActivity implements MyProfileFragment
         super.onDestroy();
         Log.d("pttt", "onDestroy: ");
     }
+
+
 }

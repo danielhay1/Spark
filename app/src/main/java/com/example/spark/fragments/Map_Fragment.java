@@ -95,6 +95,7 @@ public class Map_Fragment extends Fragment{
     private Switch map_SWITCH_autopark;
     //EditText
     private TextView map_TV_distance;
+    private TextView map_TV_estimateTime;
 
     //LocationTrack
     private LocationSource.OnLocationChangedListener locationChangedListener;
@@ -152,6 +153,7 @@ public class Map_Fragment extends Fragment{
         map_BTN_FollowMyCurrentLocation = view.findViewById(R.id.map_BTN_FollowMyCurrentLocation);
         map_SWITCH_autopark = view.findViewById(R.id.map_SWITCH_autopark);
         map_BTN_cancelHistoryParking = view.findViewById(R.id.map_BTN_cancelHistoryParking);
+        map_TV_estimateTime = view.findViewById(R.id.map_TV_estimateTime);
     }
 
     private void initViews() {
@@ -257,6 +259,7 @@ public class Map_Fragment extends Fragment{
         }
     }
 
+    //DELETE ORIGIN COMMENT LINE
     private void onParkClick(String markerTitle, String markerIcon) {
         MyLocationServices.getInstance().setLastBestLocation(new MyLocationServices.CallBack_Location() {
             @Override
@@ -266,7 +269,8 @@ public class Map_Fragment extends Fragment{
                 {
                     Log.d("pttt", "locationReady: currentParkingLocation = "+currentLocation.toString());
                     if(myParkingMarker == null) {
-                        myParkingMarker = park(googleMap, currentLocation,markerTitle,markerIcon);
+                        LatLng parkinglocation = new LatLng(32.063557,34.820062);   //DELETE THIS DEBUG LINE!
+                        myParkingMarker = park(googleMap, parkinglocation,markerTitle,markerIcon);
                         saveParkingLocation(preferenceLatlagKey, myParkingMarker.getPosition());
                     }
                 }
@@ -301,20 +305,36 @@ public class Map_Fragment extends Fragment{
         return myParkMarker;
     }
 
-    private void drawRoute(LatLng origin, LatLng destination) {
+    private void drawRoute(LatLng origin, LatLng destination, RouteBulider routeBulider) {
         if(myLocationMarker == null) {
             myLocationMarker = addMarkerToMap(googleMap,origin,"Origin",CURRENT_LOCATION_ICON);
         }
-        RouteBulider routeBulider = new RouteBulider(origin,destination,this.getActivity().getApplicationContext());
         route = googleMap.addPolyline(routeBulider.getPolylineRoute());
     }
 
-    private  void removeRoute() {
+    private void updateRouteLbls(RouteBulider routeBulider ,LatLng origin, LatLng destination) {
+        if(origin!=null && destination!=null) {
+            Log.d("pttt", "updateRouteLbls: origin="+origin+", dest="+destination);
+            String distance = routeBulider.routeDistanceToString(origin,destination);
+            String estimateTime = routeBulider.routeEstimateTimeToString(origin,destination);
+            map_TV_distance.setText("Route distance: "+distance);
+            map_TV_estimateTime.setText("Estimate Time: "+estimateTime);
+            double dist = Double.parseDouble(distance.substring(0,distance.length()-3));
+            if(dist == 0){
+                parking_state = PARKING_STATE.PARKING;
+                removeRoute();
+                updateUI();
+            }
+        }
+    }
+
+    private void removeRoute() {
         if(myLocationMarker != null) {
             myLocationMarker.remove();
             myLocationMarker = null;
         }
         route.remove();
+        route=null;
     }
 
     private void cancelParking() {
@@ -353,10 +373,14 @@ public class Map_Fragment extends Fragment{
             map_BTN_park.setClickable(false);
             map_BTN_park.setVisibility(View.INVISIBLE);
             map_TV_distance.setVisibility(View.VISIBLE);
+            map_TV_estimateTime.setVisibility(View.VISIBLE);
         } else {
             map_BTN_park.setClickable(true);
             map_BTN_park.setVisibility(View.VISIBLE);
+            map_TV_distance.setText("Route distance: ");
+            map_TV_estimateTime.setText("Estimate Time: ");
             map_TV_distance.setVisibility(View.INVISIBLE);
+            map_TV_estimateTime.setVisibility(View.INVISIBLE);
         }
         if(myHistoryParkingMarker!=null){
             //SET VISABLE, SET CANCEL HISTORYMAKER VISABLE
@@ -370,14 +394,15 @@ public class Map_Fragment extends Fragment{
     }
 
     private void navigateToParking() {
-        parking_state = PARKING_STATE.NAVIGATING;
-        updateUI();
-        LatLng destination = myParkingMarker.getPosition();
+        if(parking_state != PARKING_STATE.NAVIGATING) {
+            parking_state = PARKING_STATE.NAVIGATING;
+            updateUI();
+        }
         LatLng origin = myCurrentLocation;
-        origin = new LatLng(32.05853290879904, 34.82934680220547);
-        //RouteBuilder2 routeBuilder2 = new RouteBuilder2(origin,destination,this.getActivity().getApplicationContext(),googleMap);
-        //routeBuilder2.buildRoute();
-        drawRoute(origin,destination);
+        LatLng destination = myParkingMarker.getPosition();
+        routeBulider = new RouteBulider(origin,destination,this.getActivity().getApplicationContext());
+        drawRoute(origin,destination,routeBulider);
+        updateRouteLbls(routeBulider,origin,destination);
     }
 
     private void initCurrentLocation() {
@@ -693,6 +718,12 @@ public class Map_Fragment extends Fragment{
                 if(autoFocusCurrentLocation) {
                     setFocus(myCurrentLocation,BIG_SCALE);
                 }
+                if(parking_state == PARKING_STATE.NAVIGATING) {
+                    if(myParkingMarker!=null) {
+                        LatLng destination = myParkingMarker.getPosition();
+                        updateRouteLbls(routeBulider,myCurrentLocation,destination);
+                    }
+                }
             }
         });
 
@@ -738,7 +769,7 @@ public class Map_Fragment extends Fragment{
             } else {
                 String msg = getParkingMarkerMsg(user.getName(),parking.getTime());
                 if(myHistoryParkingMarker == null){
-                    addMarkerToMap(googleMap,latLng,msg,PARKING_HISTORY_ICON);
+                    myHistoryParkingMarker = addMarkerToMap(googleMap,latLng,msg,PARKING_HISTORY_ICON);
 
                 } else {
                     myHistoryParkingMarker.setPosition(latLng);
@@ -765,6 +796,24 @@ public class Map_Fragment extends Fragment{
         myHistoryParkingMarker=null;
         updateUI();
     }
+
+    public boolean onBackPress() {
+        /**
+         * Method
+         * If parking_state = PARKING_STATE.DRIVING method return false
+         */
+        if(parking_state == PARKING_STATE.DRIVING) {
+            return true;
+        } else if(parking_state == PARKING_STATE.PARKING) {
+            cancelParking();
+        } else {
+            parking_state = PARKING_STATE.PARKING;
+            removeRoute();
+            updateUI();
+        }
+        return false;
+    }
+
 
     @Override
     public void onPause() {
@@ -890,4 +939,5 @@ public class Map_Fragment extends Fragment{
             cancelHistoryParking();
         }
     };
+
 }

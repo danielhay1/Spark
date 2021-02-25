@@ -64,6 +64,10 @@ public class PagerAdapter extends FragmentPagerAdapter {
         myProfileFragment.onActivityResult(requestCode,resultCode,data);
     }
 
+    public boolean onMapFragmentBackPress() {
+        return  map_fragment.onBackPress();
+    }
+
 
     @NonNull
     @Override

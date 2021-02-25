@@ -120,7 +120,7 @@ public class MyProfileFragment extends Fragment {
             msg = "Are you sure you want to remove this vehicle?" +
                     "\n Vehicle number: \'"+user.getConnectedVehicleID()+"\'" +
                     "\nVehicle nickname: \'"+vehicle.getVehicleNick()+"\'";
-            MySignal.getInstance().alertDialog(this.getActivity(), "Delete Vehicle:", msg, "I am sure!", "Cancel vehicle remove.", new DialogInterface.OnClickListener() {
+            MySignal.getInstance().alertDialog(this.getActivity(), "Delete Vehicle:", msg, "I am sure!", "Cancel.", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     removeVehicleOwner();
