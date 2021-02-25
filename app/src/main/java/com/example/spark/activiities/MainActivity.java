@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.example.spark.R;
+import com.example.spark.fragments.MyProfileFragment;
 import com.example.spark.untils.MyFireBaseServices;
 import com.example.spark.objects.PagerAdapter;
 import com.example.spark.objects.User;
@@ -24,10 +25,11 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
 
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity implements MyProfileFragment.FragmentToActivity {
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
     public static final int UPDATE_USER = 2;
+    public static final int UPDATE_USER_VEHICLE = 3;
 
     public final static String USER_INTENT = "user";
     private TabLayout main_NAVBAR;
@@ -198,6 +200,14 @@ public class MainActivity extends AppCompatActivity{
         }
     }//onActivityResult
 
+    @Override
+    public void onDataPass(String data) {
+        Intent intent = new Intent();
+        intent.putExtra(USER_INTENT,data);
+        this.onActivityResult(UPDATE_USER | 0xffff0000,Activity.RESULT_OK,intent);
+    }
+
+
     private Bundle sendUserToFragment() {
         String jsonUser = getJsonUser(this.user);
         Bundle bundle = new Bundle();
@@ -271,7 +281,6 @@ public class MainActivity extends AppCompatActivity{
         super.onStart();
         Log.d("pttt", "onStart: ");
         if(!isLocationTrakerOn) {
-            EnableMyLocationServices();
             EnableMyLocationServices();
         }
     }

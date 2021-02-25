@@ -50,7 +50,7 @@ public class Parking {
     }
 
     public Parking setCurrentDateAndtime() {
-        this.time = java.text.DateFormat.getDateTimeInstance().format(new Date());;
+        this.time = java.text.DateFormat.getDateTimeInstance().format(new Date());
         return this;
     }
 

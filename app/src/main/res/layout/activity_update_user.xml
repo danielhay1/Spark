@@ -78,8 +78,8 @@
             android:layout_marginBottom="32dp"
             android:text="Apply"
 
-            android:textColor="@color/teal_200"
+            android:textColor="@color/purple_650"
             app:cornerRadius="50dp"
-            app:strokeColor="@color/teal_500" />
+            app:strokeColor="@color/purple_650" />
     </LinearLayout>
 </RelativeLayout>

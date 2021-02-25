@@ -44,6 +44,9 @@ dependencies {
     //GoogleMaps api draw routes
     implementation 'com.google.maps:google-maps-services:0.15.0'
     implementation 'org.slf4j:slf4j-nop:1.7.25'
+    //
+    implementation 'com.github.malikdawar:drawroute:1.2-rx'
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0' // add the support for RX
     //may delete
     implementation 'com.github.jd-alexander:library:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
@@ -60,4 +63,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-database' // Realtime DB
     //RippleEffect
     implementation 'androidx.cardview:cardview:1.0.0'
+    //bluetooth
+    implementation 'com.github.sirvar:bluetoothkit-android:v0.3.1'
+    //StreetView
+    implementation 'com.github.alkurop:Steet_View_Markers:b3135db618'
 }

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.ParkingHistoryFragment"
+    android:background="@color/appBackgroundColor">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@drawable/gradient_background">
+        <!--Title-->
+        <TextView
+            android:id="@+id/parkinghistoy_TV_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:background="@color/purple_500"
+            android:maxLines="1"
+            android:padding="16dp"
+            android:textStyle="bold"
+            android:textSize="12pt"
+            android:textColor="@color/white"
+            android:text="Parking History"/>
+        <!--ListView-->
+        <ListView
+            android:id="@+id/parkinghistoy_LV_parking"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:listSelector="@color/selector_purple" />
+    </LinearLayout>
+
+</FrameLayout>

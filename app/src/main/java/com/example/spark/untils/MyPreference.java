@@ -13,7 +13,7 @@ public class MyPreference {
     private static MyPreference instance;
     private SharedPreferences sharedPreferences;
 
-    private final String MY_PARKINGLOCATION = "my_parking_location";
+    private final String MY_PARKING = "my_parking";
 
     public static MyPreference getInstance() {
         //Singleton design pattern
@@ -21,7 +21,7 @@ public class MyPreference {
     }
 
     private MyPreference(Context appContext) {
-        sharedPreferences = appContext.getSharedPreferences(MY_PARKINGLOCATION,Context.MODE_PRIVATE);
+        sharedPreferences = appContext.getSharedPreferences(MY_PARKING,Context.MODE_PRIVATE);
     }
 
     public static void Init(Context appContext) {

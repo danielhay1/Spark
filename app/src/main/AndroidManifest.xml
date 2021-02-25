@@ -32,7 +32,9 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/api_key" />
 
-        <activity android:name=".activiities.MainActivity" />
+        <activity
+            android:name=".activiities.MainActivity"
+            android:screenOrientation="portrait"/>
 
         <service android:name=".untils.GpsTracker_service" />
     </application>

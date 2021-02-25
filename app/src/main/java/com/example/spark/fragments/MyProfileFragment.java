@@ -1,7 +1,10 @@
 package com.example.spark.fragments;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,6 +15,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 
 
@@ -22,7 +28,12 @@ import com.example.spark.activiities.UpdateUserActivity;
 import com.example.spark.objects.Vehicle;
 import com.example.spark.untils.MyFireBaseServices;
 import com.example.spark.objects.User;
+import com.example.spark.untils.MySignal;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MyProfileFragment extends Fragment {
 
@@ -31,12 +42,21 @@ public class MyProfileFragment extends Fragment {
     private TextView myprofile_TV_vehicleNumber;
     private TextView myprofile_TV_vehicleNick;
     private TextView myprofile_TV_vehicleOwners;
+    private TextInputLayout myprofile_TF_myVehicles;
+    private AutoCompleteTextView myprofile_ACT_myVehicles;
+    private com.google.android.material.button.MaterialButton updateUser_BTN_removeVehicle;
     private com.google.android.material.button.MaterialButton myprofile_BTN_logout;
     private com.google.android.material.button.MaterialButton updateUser_BTN_editProfile;
     private User user;
     private Vehicle vehicle;
-    private boolean isFragmentCreated = false;
+    private ArrayAdapter<String> adapter;
+    private FragmentToActivity fragmentToActivityCallBack;
 
+    public static final String SELECTED_VEHICLE_RESULTCODE = "user_vehicle";
+
+    public interface FragmentToActivity {
+        public void onDataPass(String data);
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,11 +81,12 @@ public class MyProfileFragment extends Fragment {
         myprofile_TV_vehicleNumber = view.findViewById(R.id.myprofile_TV_vehicleNumber);
         myprofile_TV_vehicleNick = view.findViewById(R.id.myprofile_TV_vehicleNick);
         myprofile_TV_vehicleOwners = view.findViewById(R.id.myprofile_TV_vehicleOwners);
-        isFragmentCreated = true;
+        myprofile_TF_myVehicles = view.findViewById(R.id.myprofile_TF_myVehicles);
+        myprofile_ACT_myVehicles = view.findViewById(R.id.myprofile_ACT_myVehicles);
+        updateUser_BTN_removeVehicle = view.findViewById(R.id.updateUser_BTN_removeVehicle);
     }
 
     private void initViews() {
-        updateUserData();
         myprofile_BTN_logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,6 +102,71 @@ public class MyProfileFragment extends Fragment {
                 startActivityForResult(intent, MainActivity.UPDATE_USER);
             }
         });
+        updateUser_BTN_removeVehicle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                removeVehicleFromUser();
+            }
+        });
+    }
+
+    private void removeVehicleFromUser() {
+        if(!user.getConnectedVehicleID().equalsIgnoreCase("") && (!this.user.getMyVehicles().isEmpty())) {
+            String msg;
+            if(vehicle==null) {
+                msg = "Are you sure you want to remove this vehicle?" +
+                        "\n Vehicle number: \'"+user.getConnectedVehicleID()+"\'";
+            }
+            msg = "Are you sure you want to remove this vehicle?" +
+                    "\n Vehicle number: \'"+user.getConnectedVehicleID()+"\'" +
+                    "\nVehicle nickname: \'"+vehicle.getVehicleNick()+"\'";
+            MySignal.getInstance().alertDialog(this.getActivity(), "Delete Vehicle:", msg, "I am sure!", "Cancel vehicle remove.", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    removeVehicleOwner();
+                }
+            });
+        } else {
+            MySignal.getInstance().toast("User has no vehicles!");
+        }
+
+    }
+
+    private void removeVehicleOwner() {
+        /**
+         * Method checks if vehicle has no owners, if does delete vehicle from DB.
+         */
+        Log.e("pttt", "removeVehicleOwner: (MyProfileFragment)");
+        MyFireBaseServices.getInstance().loadVehicleFromFireBase(user.getConnectedVehicleID(), new MyFireBaseServices.CallBack_LoadVehicle() {
+            @Override
+            public void vehicleDetailsUpdated(Vehicle result) {
+                if(result != null) {
+                    if(result.isOwnedBy(user.getUid())) {
+                        result.removeOwner(user.getUid());
+                        user.removeVehicle(result.getVehicleID());
+                        if(result.hasNoOwners()){
+                            MyFireBaseServices.getInstance().deleteVehicleFromFireBase(result.getVehicleID());
+                        }
+                        MyFireBaseServices.getInstance().saveVehicleToFireBase(result);
+                        sendResult(user);
+                        if(user.getMyVehicles().isEmpty()) {
+                            myprofile_ACT_myVehicles.setText("User has no vehicles!");
+                            myprofile_ACT_myVehicles.setTextColor(Color.RED);
+                        } else {
+                            myprofile_ACT_myVehicles.setHint("");
+                            myprofile_ACT_myVehicles.setHintTextColor((Color.WHITE));
+                        }
+                    }
+                } else {
+                    Log.d("pttt", "loadFailed: Failed to read value: VALUE IS NULL!");
+                }
+            }
+
+            @Override
+            public void loadFailed(Exception e) {
+                Log.d("pttt", "loadFailed: Failed to read value "+e.getMessage());
+            }
+        });
     }
 
     private void getUser() {
@@ -90,7 +176,6 @@ public class MyProfileFragment extends Fragment {
                     .setName(MyFireBaseServices.getInstance().getUserName())
                     .setPhone(MyFireBaseServices.getInstance().getUserPhone())
                     .setConnectedVehicleID("");
-
             Gson gson = new Gson();
             if (getArguments() == null) {
                 getUserFromFireBase(user.getUid());
@@ -115,7 +200,6 @@ public class MyProfileFragment extends Fragment {
                     user = result;
                     Log.d("pttt", "userDetailsUpdated: \n"+user);
                     //setUserDetails
-                    updateUserData();
                 }
             }
             @Override
@@ -125,6 +209,36 @@ public class MyProfileFragment extends Fragment {
         });
     }
 
+    private void setmMyVehicles(ArrayList<String> myVehicles){
+        if(this.adapter.isEmpty()) {
+            myprofile_ACT_myVehicles.setText("User has no vehicles!");
+            myprofile_ACT_myVehicles.setTextColor((Color.RED));
+        } else {
+            myprofile_ACT_myVehicles.setText(""+user.getConnectedVehicleID());
+            myprofile_ACT_myVehicles.setTextColor((Color.WHITE));
+        }
+        adapter = new ArrayAdapter<String>(this.getContext(),R.layout.dropdown_item,myVehicles);
+        myprofile_ACT_myVehicles.setAdapter(adapter);
+        myprofile_ACT_myVehicles.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //TO CONTINUE: Log in the selected vehicle.
+                String selected = adapter.getItem(position);
+                Log.e("pttt", "onItemSelected: selected item = "+selected);
+                user.setConnectedVehicleID(selected);
+                sendResult(user);
+            }
+        });
+    }
+
+    private void sendResult(User user) {
+        MyFireBaseServices.getInstance().saveUserToFireBase(user);  //save user connected vehicle in firebase.
+        Gson gson = new Gson();
+        String jsonUser = gson.toJson(user);
+        fragmentToActivityCallBack.onDataPass(jsonUser);
+        // send result to Activity and other fragments;
+    }
+
 
     private String getJsonUser (User user){
         Gson gson = new Gson();
@@ -132,22 +246,20 @@ public class MyProfileFragment extends Fragment {
         return jsonUser;
     }
 
-    private void updateUserData() {
+    private void updateUserData(User user) {
         if(user != null) {
+            adapter = new ArrayAdapter<String>(this.getContext(),R.layout.dropdown_item,user.getMyVehicles());
             updateField(user.getName(),myprofile_TV_name);
             updateField(user.getPhone(),myprofile_TV_PhoneNumber);
             updateField(user.getConnectedVehicleID(),myprofile_TV_vehicleNumber);
-
-
+            setmMyVehicles(user.getMyVehicles());
             MyFireBaseServices.getInstance().loadVehicleFromFireBase(user.getConnectedVehicleID(), new MyFireBaseServices.CallBack_LoadVehicle() {
                 @Override
                 public void vehicleDetailsUpdated(Vehicle result) {
                     vehicle = result;
                     if(vehicle != null) {
-                        String ownersName = vehicle.ownersNamesToString();
-                        //Log.d("pttt", "owners = "+ownersName);
                         updateField(vehicle.getVehicleNick(),myprofile_TV_vehicleNick);
-                        updateField(ownersName,myprofile_TV_vehicleOwners);
+                        showVehicleOwnersName(vehicle);
                     }
                     else {
                         updateField("",myprofile_TV_vehicleNick);
@@ -168,6 +280,22 @@ public class MyProfileFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        try {
+            fragmentToActivityCallBack = (FragmentToActivity) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement FragmentToActivity");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        fragmentToActivityCallBack = null;
+        super.onDetach();
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         int userRequest = MainActivity.UPDATE_USER;
@@ -178,14 +306,40 @@ public class MyProfileFragment extends Fragment {
                 Gson gson = new Gson();
                 user = gson.fromJson(result,User.class);
                 Log.d("pttt", "onActivityResult (MyProfileFragment): user updated, user ="+user);
-                if(isFragmentCreated) {
-                    updateUserData();
-                }
+                updateUserData(user);
             }
             if (resultCode == Activity.RESULT_CANCELED) {
                 Log.d("pttt", "onActivityResult (MyProfileFragment): user isn't updated.");
             }
         }
+    }
+
+    public void showVehicleOwnersName(Vehicle vehicle) {
+        if(!vehicle.getOwnersUID().isEmpty()) {
+            ArrayList<String> ownersUid = vehicle.getOwnersUID();
+            myprofile_TV_vehicleOwners.setText("");
+            Log.d("pttt", "numberOfOwners="+ownersUid.size());
+            for (String uid:ownersUid) {
+                MyFireBaseServices.getInstance().loadUserFromFireBase(uid, new MyFireBaseServices.CallBack_LoadUser() {
+                    @Override
+                    public void userDetailsUpdated(User result) {
+                        if(result != null) {
+                            if(myprofile_TV_vehicleOwners.getText().equals("")){
+                                myprofile_TV_vehicleOwners.setText(""+result.getName());
+                            } else {
+                                myprofile_TV_vehicleOwners.setText(myprofile_TV_vehicleOwners.getText()+", "+result.getName());
+                            }
+                        }
+                    }
+                    @Override
+                    public void loadFailed(Exception e) {
+                        Log.d("pttt", "loadFailed: "+e.getStackTrace());
+                    }
+                });
+            }
+        }
+
+
     }
 
     private void updateField(String value, TextView textView) {
@@ -214,6 +368,12 @@ public class MyProfileFragment extends Fragment {
         if(user==null || user.getConnectedVehicleID().equalsIgnoreCase("")) {
             getUser();
         }
+    }
+
+    @Override
+    public void onResume() {
+        updateUserData(user);
+        super.onResume();
     }
 }
 

@@ -10,16 +10,30 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.example.spark.fragments.Map_Fragment;
 import com.example.spark.fragments.MyProfileFragment;
-import com.example.spark.fragments.ParkHistoryFragment;
-import com.google.android.gms.maps.MapFragment;
+import com.example.spark.fragments.ParkingHistoryFragment;
+import com.google.android.gms.maps.model.LatLng;
 
 public class PagerAdapter extends FragmentPagerAdapter {
     private int numOfTabs;
     private Bundle fragmentBundle;
 
     private Map_Fragment map_fragment;
-    private ParkHistoryFragment parkHistoryFragment;
+    private ParkingHistoryFragment parkHistoryFragment;
     private MyProfileFragment myProfileFragment;
+
+    private Map_Fragment.SendSignal sendParking_CallBack = new Map_Fragment.SendSignal() {
+        @Override
+        public void parkingHistoryLoadSignal() {
+            parkHistoryFragment.getParkingHistory();
+        }
+    };
+
+    private ParkingHistoryFragment.SendLatLng sendLatLng_CallBack = new ParkingHistoryFragment.SendLatLng(){
+        @Override
+        public void sendLatLng(Parking parking) {
+            map_fragment.addHistoryMarkerToMap(parking);
+        }
+    };
 
     public PagerAdapter(@NonNull FragmentManager fm, int numOfTabs) {
         super(fm);
@@ -29,7 +43,9 @@ public class PagerAdapter extends FragmentPagerAdapter {
 
     private void initFragments(Bundle fragmentBundle) {
         map_fragment = new Map_Fragment();
-        parkHistoryFragment = new ParkHistoryFragment();
+        map_fragment.setCallback(sendParking_CallBack);
+        parkHistoryFragment = new ParkingHistoryFragment();
+        parkHistoryFragment.setCallBack(sendLatLng_CallBack);
         myProfileFragment = new MyProfileFragment();
     }
 

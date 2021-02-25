@@ -17,6 +17,7 @@
         android:background="@color/white"
         android:textColor="@color/appBackgroundColor"
         />
+
     <TextView
         android:id="@+id/map_TV_distance"
         android:layout_width="match_parent"
@@ -38,6 +39,20 @@
         android:alpha="0.85"
         android:layout_gravity="left"
         android:layout_below="@+id/map_TV_distance"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="24dp"
+        android:visibility="invisible"
+        android:clickable="false"
+        />
+
+    <ImageView
+        android:id="@+id/map_BTN_cancelHistoryParking"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/cancel_parkinghistory_icon"
+        android:alpha="0.85"
+        android:layout_gravity="left"
+        android:layout_below="@+id/map_BTN_cancel"
         android:layout_marginLeft="24dp"
         android:layout_marginTop="24dp"
         android:visibility="invisible"

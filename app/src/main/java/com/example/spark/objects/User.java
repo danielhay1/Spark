@@ -51,12 +51,12 @@ public class User {
     }
 
     public void removeVehicle(String vehicleId) {
+        this.myVehicles.remove(vehicleId);
         if(!myVehicles.isEmpty()) {
             setConnectedVehicleID(myVehicles.get(myVehicles.size()-1));
         } else {
             setConnectedVehicleID("");
         }
-        this.myVehicles.remove(vehicleId);
     }
 
     public ArrayList<String> getMyVehicles() {

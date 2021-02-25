@@ -113,9 +113,9 @@ public class UpdateUserActivity extends AppCompatActivity {
         String vehicleNumber = updateUser_EDT_vehicleNumber.getText().toString();
         String VehicleNick = updateUser_EDT_vehicleNick.getText().toString();
         InputStatus userUpdated = updateUser(name, vehicleNumber);
-        if(previousUserVehicleId !=null && user.isOwnedVehicle(previousUserVehicleId) && (!previousUserVehicleId.equals(vehicleNumber))) {
+/*        if(previousUserVehicleId !=null && user.isOwnedVehicle(previousUserVehicleId) && (!previousUserVehicleId.equals(vehicleNumber))) {
             removeVehicleOwner(previousUserVehicleId,vehicleNumber,user.getUid());
-        }
+        }*/
         Log.e("pttt","user="+user);
         if (userUpdated == InputStatus.OK) {
             loadVehicle(name, vehicleNumber, VehicleNick,InputStatus.OK);
@@ -182,26 +182,25 @@ public class UpdateUserActivity extends AppCompatActivity {
                 .setVehicleID(vehicleNumber)
                 .setVehicleNick(vehicleNick);
         vehicle.addOwner(user.getUid());
-        vehicle.addOwnerName(userName);
+        //vehicle.addOwnerName(userName);
         MyFireBaseServices.getInstance().loadVehicleFromFireBase(vehicleNumber, new MyFireBaseServices.CallBack_LoadVehicle() {
             @Override
             public void vehicleDetailsUpdated(Vehicle result) {
                 Log.e("pttt","user="+user);
                 if(result != null) {
                     if (!result.isOwnedBy(user.getUid())) {
-                        Log.e("pttt", "Vehicle has new owner!");
+                        Log.d("pttt", "Vehicle has new owner!");
                         result.addOwner(user.getUid());
-                        result.addOwnerName(userName);
+                        //result.addOwnerName(userName);
                     } else {
-                        result.changeOwnerName(user.getUid(),userName);
+                        //result.changeOwnerName(user.getUid(),userName);
                     }
 
                     vehicle = result;
-                    Log.e("pttt", "vehicleDetailsUpdated: owners= "+vehicle.getOwnersUID());
-                    Log.e("pttt", "vehicleDetailsUpdated: "+vehicle);
+                    Log.d("pttt", "vehicleDetailsUpdated: "+vehicle);
                     submitInsertedData(inputStatus);
                 } else {
-                    Log.e("pttt", "vehicleDetailsUpdated: NULL RESULT!");
+                    Log.d("pttt", "vehicleDetailsUpdated: NULL RESULT!");
                     submitInsertedData(inputStatus);
                 }
             }

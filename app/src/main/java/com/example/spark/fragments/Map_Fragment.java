@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -45,6 +46,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.gson.Gson;
+import com.sirvar.bluetoothkit.BluetoothKit;
+
+import java.util.ArrayList;
+import java.util.Date;
 
 
 public class Map_Fragment extends Fragment{
@@ -59,7 +64,9 @@ public class Map_Fragment extends Fragment{
     }
 
     private final String CURRENT_LOCATION_ICON = "user_png_marker";
-    private final String CAR_ICON = "car_png_marker";
+    private final String PARKING_ICON = "car_png_marker";
+    private final String PARKING_HISTORY_ICON = "history_clock_icon";
+    private final String PREFERENCE_MARKER_MSG_PREFIX = "marker_msg_";
 
 
     private User user;
@@ -74,6 +81,7 @@ public class Map_Fragment extends Fragment{
     private LatLng myCurrentLocation;
     private Marker myParkingMarker;
     private Marker myLocationMarker;
+    private Marker myHistoryParkingMarker;
     private PARKING_STATE parking_state = PARKING_STATE.DRIVING;
     private boolean autoFocusCurrentLocation;
 
@@ -81,8 +89,10 @@ public class Map_Fragment extends Fragment{
     private ImageView map_BTN_park;
     private ImageView map_BTN_LocationFocus;
     private ImageView map_BTN_cancel;
+    private ImageView map_BTN_cancelHistoryParking;
     private ImageView map_BTN_parkingFocus;
     private ImageView map_BTN_FollowMyCurrentLocation;
+    private Switch map_SWITCH_autopark;
     //EditText
     private TextView map_TV_distance;
 
@@ -90,7 +100,18 @@ public class Map_Fragment extends Fragment{
     private LocationSource.OnLocationChangedListener locationChangedListener;
     private LocationReceiver locationReceiver;
     private boolean gpsEnabled; //Checks of gps enabled
-    private String preferenceKey = "parking_marker";
+    private String preferenceLatlagKey = "parking_marker";
+    //bluetooth connection
+    private BluetoothKit bluetoothKit = new BluetoothKit();
+    private SendSignal sendSignalCallBack;
+
+    public interface SendSignal {
+        public void parkingHistoryLoadSignal();
+    }
+
+    public void setCallback(SendSignal sendParking_CallBack) {
+        this.sendSignalCallBack = sendParking_CallBack;
+    }
 
 
     @Override
@@ -117,7 +138,6 @@ public class Map_Fragment extends Fragment{
                 } else {
                     initMapFragment();
                 }
-
             }
         });
         return view;
@@ -130,6 +150,8 @@ public class Map_Fragment extends Fragment{
         map_BTN_parkingFocus = view.findViewById(R.id.map_BTN_parkingFocus);
         map_TV_distance = view.findViewById(R.id.map_TV_distance);
         map_BTN_FollowMyCurrentLocation = view.findViewById(R.id.map_BTN_FollowMyCurrentLocation);
+        map_SWITCH_autopark = view.findViewById(R.id.map_SWITCH_autopark);
+        map_BTN_cancelHistoryParking = view.findViewById(R.id.map_BTN_cancelHistoryParking);
     }
 
     private void initViews() {
@@ -138,6 +160,8 @@ public class Map_Fragment extends Fragment{
         map_BTN_cancel.setOnClickListener(onClickCancel);
         map_BTN_parkingFocus.setOnClickListener(onClickParkingFocus);
         map_BTN_FollowMyCurrentLocation.setOnClickListener(onAutoFocusMyLocation);
+        map_SWITCH_autopark.setOnClickListener(onSwitchClick);
+        map_BTN_cancelHistoryParking.setOnClickListener(removeHistoryParkingMarker);
     }
 
     public void setupMap(GoogleMap map) {
@@ -243,7 +267,7 @@ public class Map_Fragment extends Fragment{
                     Log.d("pttt", "locationReady: currentParkingLocation = "+currentLocation.toString());
                     if(myParkingMarker == null) {
                         myParkingMarker = park(googleMap, currentLocation,markerTitle,markerIcon);
-                        saveParkingLocation(preferenceKey, myParkingMarker.getPosition());
+                        saveParkingLocation(preferenceLatlagKey, myParkingMarker.getPosition());
                     }
                 }
             }
@@ -270,6 +294,10 @@ public class Map_Fragment extends Fragment{
         }
         updateUI();
         Log.d("pttt", "parking_state = PARKING");
+        if(sendSignalCallBack!=null) {
+            Log.e("pttt", "park: Send parkingHistory update signal");
+            sendSignalCallBack.parkingHistoryLoadSignal();
+        }
         return myParkMarker;
     }
 
@@ -292,7 +320,7 @@ public class Map_Fragment extends Fragment{
     private void cancelParking() {
         parking_state = PARKING_STATE.DRIVING;
         if(myParkingMarker != null) {
-            localRemoveParkingLocation(preferenceKey);  //local parking remove
+            localRemoveParkingLocation(preferenceLatlagKey);  //local parking remove
             myParkingMarker.remove();
             myParkingMarker = null;
             MyFireBaseServices.getInstance().deletePakringFromFireBase(user.getConnectedVehicleID());    //online parking remove
@@ -314,7 +342,6 @@ public class Map_Fragment extends Fragment{
             map_BTN_parkingFocus.setVisibility(View.INVISIBLE);
             map_BTN_cancel.setClickable(false);
         }
-
         else if(parking_state == PARKING_STATE.PARKING || parking_state == PARKING_STATE.NAVIGATING) {
             map_BTN_cancel.setVisibility(View.VISIBLE);
             map_BTN_cancel.setClickable(true);
@@ -322,7 +349,6 @@ public class Map_Fragment extends Fragment{
             map_BTN_parkingFocus.setClickable(true);
             ImgLoader.getInstance().loadImg("parking_btn_navigate_icon",map_BTN_park);
         }
-
         if(parking_state == PARKING_STATE.NAVIGATING) {
             map_BTN_park.setClickable(false);
             map_BTN_park.setVisibility(View.INVISIBLE);
@@ -331,6 +357,15 @@ public class Map_Fragment extends Fragment{
             map_BTN_park.setClickable(true);
             map_BTN_park.setVisibility(View.VISIBLE);
             map_TV_distance.setVisibility(View.INVISIBLE);
+        }
+        if(myHistoryParkingMarker!=null){
+            //SET VISABLE, SET CANCEL HISTORYMAKER VISABLE
+            map_BTN_cancelHistoryParking.setVisibility(View.VISIBLE);
+            map_BTN_cancelHistoryParking.setClickable(true);
+        } else {
+            //SET INVISABLE, SET CANCEL HISTORYMAKER INVISABLE AND NOT CLICKABLE
+            map_BTN_cancelHistoryParking.setVisibility(View.INVISIBLE);
+            map_BTN_cancelHistoryParking.setClickable(false);
         }
     }
 
@@ -429,7 +464,6 @@ public class Map_Fragment extends Fragment{
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         Log.d("pttt", "Map_Fragment - onRequestPermissionsResult:\t requestCode="+requestCode);
-        //this.getActivity().onRequestPermissionsResult(MainActivity.MY_PERMISSIONS_REQUEST_LOCATION, permissions,grantResults);
         switch (requestCode) {
             case MainActivity.MY_PERMISSIONS_REQUEST_LOCATION : {
                 // If request is cancelled, the result arrays are empty.
@@ -443,7 +477,7 @@ public class Map_Fragment extends Fragment{
 
                 } else {
 
-                    // permission denied, boo! Disable the
+                    // permission denied, Disable the
                     // functionality that depends on this permission.
                     Log.d("pttt", "onRequestPermissionsResult: DENY");
                     MySignal.getInstance().toast("Permission denied");
@@ -463,24 +497,23 @@ public class Map_Fragment extends Fragment{
                 String result=data.getStringExtra(MainActivity.USER_INTENT);
                 Gson gson = new Gson();
                 User temp = gson.fromJson(result,User.class);
-                Log.d("pttt", "onActivityResult (MapFragment): user updated, user ="+user);
-                preferenceKey = user.getConnectedVehicleID();
-                if(!temp.getConnectedVehicleID().equals(user.getConnectedVehicleID())) {
-                    Log.e("pttt", "onActivityResult: \tconnectedUser="+user.getConnectedVehicleID()+",updatedUser="+temp.getConnectedVehicleID());
+                Log.d("pttt", "onActivityResult (MapFragment): user updated, user ="+temp);
+                preferenceLatlagKey = user.getConnectedVehicleID();
+                if(!temp.getConnectedVehicleID().equals(user.getConnectedVehicleID())&& preferenceLatlagKey !=null) {
+                    Log.d("pttt", "onActivityResult: \tconnectedUser="+user.getConnectedVehicleID()+",updatedUser="+temp.getConnectedVehicleID());
                     this.user = temp;
                     cancelParking();
-                    myParkingMarker = loadParkingLocation(preferenceKey);   //setMyParking
+                    myParkingMarker = loadParkingLocation(preferenceLatlagKey);   //setMyParking
                 } else {
                     this.user = temp;
                 }
-                preferenceKey = user.getConnectedVehicleID();
+                preferenceLatlagKey = user.getConnectedVehicleID();
             }
             if (resultCode == Activity.RESULT_CANCELED) {
                 Log.d("pttt", "onActivityResult (MapFragment): user isn't updated.");
             }
         }
     }
-
 
     private void getUser() {
         if(user == null || user.getConnectedVehicleID().equalsIgnoreCase("")) {
@@ -501,11 +534,11 @@ public class Map_Fragment extends Fragment{
                 }
                 else {
                     this.user = loadedUser;
-                    preferenceKey = user.getConnectedVehicleID();
+                    preferenceLatlagKey = user.getConnectedVehicleID();
                     Log.d("pttt", "getUser: \tUID = "+user);
                     //setMyParking
                     if(myParkingMarker == null) {
-                        myParkingMarker = loadParkingLocation(preferenceKey);
+                        myParkingMarker = loadParkingLocation(preferenceLatlagKey);
                     }
                 }
             }
@@ -520,10 +553,10 @@ public class Map_Fragment extends Fragment{
                 if(result != null) {
                     user = result;
                     Log.d("pttt", "userDetailsUpdated: \n"+user);
-                    preferenceKey = user.getConnectedVehicleID();
+                    preferenceLatlagKey = user.getConnectedVehicleID();
                     //setMyParking
                     if(myParkingMarker == null) {
-                        myParkingMarker = loadParkingLocation(preferenceKey);
+                        myParkingMarker = loadParkingLocation(preferenceLatlagKey);
                     }
                 }
             }
@@ -536,7 +569,9 @@ public class Map_Fragment extends Fragment{
 
     //Load & Save Methdos.
     private void localSaveParkingLocation(String key, LatLng markerPos) {
+        String markerMsg = getParkingMarkerMsg(user.getName(),java.text.DateFormat.getDateTimeInstance().format(new Date()));
         MyPreference.getInstance().putObject(key,markerPos);
+        MyPreference.getInstance().putString(PREFERENCE_MARKER_MSG_PREFIX+key,markerMsg);
     }
 
     private void onlineSaveParkingLocation(LatLng markerPos) {
@@ -549,7 +584,6 @@ public class Map_Fragment extends Fragment{
                         .setUid(user.getUid())
                         .setParkingLocation(markerPos.latitude,markerPos.longitude)
                         .setCurrentDateAndtime();
-                //firebase updateParking
                 MyFireBaseServices.getInstance().saveParkingToFireBase(parking);
             }
         } else {
@@ -559,13 +593,30 @@ public class Map_Fragment extends Fragment{
 
     private void onlineLoadParkingLocation() {
         Log.d("pttt", "parkingLocationUpdated "+user);
-        MyFireBaseServices.getInstance().loadParkingLocation(user.getConnectedVehicleID(), new MyFireBaseServices.CallBack_LoadParkingLocation() {
+        MyFireBaseServices.getInstance().loadParkingLocation(user.getConnectedVehicleID(), new MyFireBaseServices.CallBack_LoadParking() {
             @Override
-            public void parkingLocationUpdated(LatLng result) {
-                if(result != null) {
-                    if(result.latitude!=0 || result.longitude!=0) {
-                        myParkingMarker = park(googleMap,result,"My parking", CAR_ICON);
-                        Log.d("pttt", "parkingLocationUpdated: parkingLocation="+result);
+            public void parkingLocationUpdated(Parking parking) {
+                if(parking != null) {
+                    if(parking.getLatitude()!=0 || parking.getLongitude()!=0) {
+                        if(parking.getUid() == user.getUid()) {
+                            MyFireBaseServices.getInstance().loadUserFromFireBase(parking.getUid(), new MyFireBaseServices.CallBack_LoadUser() {
+                                @Override
+                                public void userDetailsUpdated(User result) {
+                                    Log.d("pttt", "parkingLocationUpdated: parkingLocation="+parking);
+                                    String msg = getParkingMarkerMsg(result.getName(),parking.getTime());
+                                    myParkingMarker = park(googleMap,new LatLng(parking.getLatitude(),parking.getLongitude()),msg, PARKING_ICON);
+
+                                }
+                                @Override
+                                public void loadFailed(Exception e) {
+                                    Log.e("pttt", "loadFailed: "+e.getStackTrace());
+                                }
+                            });
+                        } else {
+                            String msg = getParkingMarkerMsg(user.getName(),parking.getTime());
+                            myParkingMarker = park(googleMap,new LatLng(parking.getLatitude(),parking.getLongitude()),msg, PARKING_ICON);
+                            Log.d("pttt", "parkingLocationUpdated: parkingLocation="+parking);
+                        }
                     }
                 } else {
                     Log.d("pttt", "parkingLocationUpdated: No parking found!");
@@ -573,6 +624,10 @@ public class Map_Fragment extends Fragment{
                     updateUI();
                 }
             }
+
+            @Override
+            public void loadParkingHistory(ArrayList<Parking> parkings) { }
+
             @Override
             public void loadFailed(Exception e) {
                 Log.d("pttt", "loadFailed: Failed to read value "+e.getMessage());
@@ -584,16 +639,20 @@ public class Map_Fragment extends Fragment{
         /***
          * Method save local and online parking marker position
          */
-        localSaveParkingLocation(key,markerPos);    //Local save parking using shared_preference.
+        //localSaveParkingLocation(key,markerPos);    //Local save parking using shared_preference.
         onlineSaveParkingLocation(markerPos);   //Online save parking using fire_base.
     }
 
     private LatLng localLoadParkingLocation(String key) {
         return (LatLng) MyPreference.getInstance().getLatLng(key);  //Local load parking using shared_preference
     }
+    private String localLoadParkingMarkerMsg(String key) {
+        return MyPreference.getInstance().getString(PREFERENCE_MARKER_MSG_PREFIX+key);
+    }
 
     private void localRemoveParkingLocation(String key) {
         MyPreference.getInstance().deleteKey(key);
+        MyPreference.getInstance().deleteKey(PREFERENCE_MARKER_MSG_PREFIX+key);
     }
 
     private Marker loadParkingLocation(String key) {
@@ -603,12 +662,16 @@ public class Map_Fragment extends Fragment{
          * if both loads fails method won't park, change parking_state to DRIVING and return null.
          */
         Marker marker = null;
+        String markerMsg = "My parking";
         if(myParkingMarker == null) {
             LatLng markerPos = localLoadParkingLocation(key);
+            if(!user.getConnectedVehicleID().equalsIgnoreCase("")) {
+                markerMsg = localLoadParkingMarkerMsg(user.getConnectedVehicleID());
+            }
             if(markerPos != null) {
                 Log.d("pttt", "loadParkingLocation: \tmarker_position= "+markerPos);
-                marker = park(googleMap,markerPos,"My parking", CAR_ICON);
-            } else if (markerPos == null && !user.getConnectedVehicleID().equalsIgnoreCase("")) {    //No parking latlng found in shared_preference trying to find parking latlng at fire_base
+                marker = park(googleMap,markerPos,markerMsg, PARKING_ICON);
+            } else if (markerPos == null) {    //No parking latlng found in shared_preference trying to find parking latlng at fire_base
                 onlineLoadParkingLocation();
                 marker = myParkingMarker;
             }
@@ -644,6 +707,65 @@ public class Map_Fragment extends Fragment{
         }
     }
 
+    //Callback method
+    public void addHistoryMarkerToMap(Parking parking) {
+        LatLng latLng = new LatLng(parking.getLatitude(),parking.getLongitude());
+        String name = user.getName();
+        Log.e("pttt", "addHistoryMarkerToMap: Marker Latlng= "+latLng);
+        //TO CONTINUE
+        if(googleMap!=null) {
+            if(this.user.getUid() != parking.getUid()) {
+                MyFireBaseServices.getInstance().loadUserFromFireBase(parking.getUid(), new MyFireBaseServices.CallBack_LoadUser() {
+                    @Override
+                    public void userDetailsUpdated(User result) {
+                        String msg = getParkingMarkerMsg(result.getName(),parking.getTime());
+                        if(myHistoryParkingMarker == null){
+                            myHistoryParkingMarker = addMarkerToMap(googleMap,latLng,msg,PARKING_HISTORY_ICON);
+
+                        } else {
+                            myHistoryParkingMarker.setPosition(latLng);
+                            myHistoryParkingMarker.setTitle(msg);
+                        }
+                        setFocus(latLng,NORMAL_SCALE);
+                        myHistoryParkingMarker.showInfoWindow();
+                        updateUI();
+                    }
+                    @Override
+                    public void loadFailed(Exception e) {
+                        Log.e("pttt", "loadFailed: "+e.getStackTrace());
+                    }
+                });
+            } else {
+                String msg = getParkingMarkerMsg(user.getName(),parking.getTime());
+                if(myHistoryParkingMarker == null){
+                    addMarkerToMap(googleMap,latLng,msg,PARKING_HISTORY_ICON);
+
+                } else {
+                    myHistoryParkingMarker.setPosition(latLng);
+                    myHistoryParkingMarker.setTitle(msg);
+                }
+                setFocus(latLng,NORMAL_SCALE);
+                myHistoryParkingMarker.showInfoWindow();
+                updateUI();
+            }
+        }
+    }
+
+    private String getParkingMarkerMsg(String name,String date){
+        if(name == null || name.equalsIgnoreCase("")) {
+            return date;
+        } else {
+            return (name+": "+date);
+        }
+
+    }
+
+    private void cancelHistoryParking() {
+        myHistoryParkingMarker.remove();
+        myHistoryParkingMarker=null;
+        updateUI();
+    }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -670,7 +792,7 @@ public class Map_Fragment extends Fragment{
             //setMyParking
             if(myParkingMarker == null) {
                 Log.d("pttt", "Setting Parking");
-                myParkingMarker = loadParkingLocation(preferenceKey);
+                myParkingMarker = loadParkingLocation(preferenceLatlagKey);
             }
             if(!this.map_BTN_cancel.isClickable() && parking_state != PARKING_STATE.DRIVING) {
                 updateUI();
@@ -694,7 +816,8 @@ public class Map_Fragment extends Fragment{
                 MySignal.getInstance().toast("Setting google maps walk navigation to parking");
                 navigateToParking();
             } else {
-                onParkClick("My parking", CAR_ICON);
+                String msg = getParkingMarkerMsg(user.getName(),java.text.DateFormat.getDateTimeInstance().format(new Date()));
+                onParkClick(msg, PARKING_ICON);
             }
         }
     };
@@ -744,6 +867,27 @@ public class Map_Fragment extends Fragment{
             } else {
                 ImgLoader.getInstance().loadImg("icon_mylocation_focus",map_BTN_FollowMyCurrentLocation);
             }
+        }
+    };
+
+    private View.OnClickListener onSwitchClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if(map_SWITCH_autopark.isChecked() == true){
+                if(!bluetoothKit.isEnabled()) {
+                    bluetoothKit.enable();
+                }
+            } else {
+
+            }
+
+        }
+    };
+
+    private View.OnClickListener removeHistoryParkingMarker = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            cancelHistoryParking();
         }
     };
 }
