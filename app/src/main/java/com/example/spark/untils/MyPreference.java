@@ -14,6 +14,11 @@ public class MyPreference {
     private SharedPreferences sharedPreferences;
 
     private final String MY_PARKING = "my_parking";
+    public interface KEYS {
+        public final String BT_AUTO_PARKING = "bt_auto_parking_status";
+        public final String PREFERENCE_MARKER_MSG_PREFIX = "marker_msg_";
+
+    }
 
     public static MyPreference getInstance() {
         //Singleton design pattern
@@ -29,6 +34,18 @@ public class MyPreference {
             Log.d("pttt", "Init: MyPreference");
             instance = new MyPreference(appContext);
         }
+    }
+
+    public void putBoolean(String key, boolean value) {
+        Log.d("pttt", "putBoolean \tkey= "+key+", Value= "+value);
+        SharedPreferences.Editor editor  = sharedPreferences.edit();
+        editor.putBoolean(key, value);
+        editor.apply();
+    }
+
+    public boolean getBoolean(String key) {
+        Log.d("pttt", "getBoolean ,key= "+key);
+        return sharedPreferences.getBoolean(key,false);
     }
 
     public void putString(String key, String value) {

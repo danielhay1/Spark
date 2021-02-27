@@ -59,8 +59,4 @@ dependencies {
     implementation 'com.google.firebase:firebase-database' // Realtime DB
     //RippleEffect
     implementation 'androidx.cardview:cardview:1.0.0'
-    //bluetooth
-    implementation 'com.github.sirvar:bluetoothkit-android:v0.3.1'
-    //StreetView
-    implementation 'com.github.alkurop:Steet_View_Markers:b3135db618'
 }

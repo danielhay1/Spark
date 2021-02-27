@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.spark.R;
@@ -15,8 +16,7 @@ import com.example.spark.R;
 public class SplashActivity extends AppCompatActivity {
 
     private final int ANIMATION_DURATION = 3000;
-
-    private TextView splash_TEXTVIEW_logo;
+    private ImageView splash_TEXTVIEW_logo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

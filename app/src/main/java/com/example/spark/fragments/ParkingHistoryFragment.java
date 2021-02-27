@@ -142,7 +142,7 @@ public class ParkingHistoryFragment extends Fragment {
     }
 
     public void getParkingHistory() {
-        Log.e("pttt", "getParkingHistory: (for vehicle): "+this.user.getConnectedVehicleID());
+        Log.d("pttt", "getParkingHistory: (for vehicle): "+this.user.getConnectedVehicleID());
         parkinghistoy_LV_parking.setAdapter(null);
         customListViewAdapter = null;
         MyFireBaseServices.getInstance().loadParkingHistoryFromFireBase(user.getConnectedVehicleID(), MAX_ROWS, new MyFireBaseServices.CallBack_LoadParking() {
@@ -150,7 +150,7 @@ public class ParkingHistoryFragment extends Fragment {
             public void parkingLocationUpdated(Parking parking) { }
             @Override
             public void loadParkingHistory(ArrayList<Parking> result) {
-                Log.e("pttt", "loadParkingHistory: PARKINGS "+result);
+                Log.d("pttt", "loadParkingHistory: PARKINGS "+result);
                 if(result!=null) {
                     if(!result.isEmpty()){
                         parkings = (Parking[]) result.toArray(new Parking[result.size()]);

@@ -162,14 +162,14 @@ public class MyFireBaseServices {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot!=null) {
-                    Log.e("ptt", "DELETE VEHICLE!");
+                    Log.d("ptt", "DELETE VEHICLE!");
                     deletePakringFromFireBase(vehicleId);
                     dataSnapshot.getRef().removeValue();
                 }
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e("pttt", "onCancelled", databaseError.toException());
+                Log.d("pttt", "onCancelled", databaseError.toException());
             }
         });
     }
@@ -181,7 +181,7 @@ public class MyFireBaseServices {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot!=null) {
-                    Log.e("ptt", "DELETE PARKING!" );
+                    Log.d("ptt", "DELETE PARKING!" );
                     dataSnapshot.getRef().removeValue();
                 } else {
                     Log.d("pttt", "onDataChange: Vehicle delete, there is no parking for this vehicle!");

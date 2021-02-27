@@ -29,7 +29,6 @@ public class MainActivity extends AppCompatActivity implements MyProfileFragment
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
     public static final int UPDATE_USER = 2;
-    public static final int UPDATE_USER_VEHICLE = 3;
 
     public final static String USER_INTENT = "user";
     private TabLayout main_NAVBAR;

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="api_key" translatable="false">
-        <!--AIzaSyBFhBTV7-skElaQNh5a_naWqU91Q_YpjLs-->
         AIzaSyCNXHEEH7ONf07DODAWew18KK4QKOLQQaA
     </string>
 </resources>

@@ -136,7 +136,7 @@ public class RouteBulider {
         int walkingSpeed = AVERAGE_WALKING_SPEED;       //walking speed in KM
         double distance = getRouteDistance(origin,destination);
         double res = distance/walkingSpeed;
-        return String.format("%.1f",res) + " mins";
+        return String.format("%.1f",res*10) + " mins";
     }
 
     public String routeDistanceToString(LatLng origin, LatLng destination) {

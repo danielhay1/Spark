@@ -3,11 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <fragment
         android:id="@+id/google_maps"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:name="com.google.android.gms.maps.SupportMapFragment"/>
+
     <Switch
         android:id="@+id/map_SWITCH_autopark"
         android:layout_width="match_parent"
@@ -16,6 +18,7 @@
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:background="@color/white"
         android:textColor="@color/appBackgroundColor"
+        android:checked="false"
         />
 
     <LinearLayout

@@ -10,18 +10,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="@drawable/gradient_background">
+        android:background="@drawable/ic_launcher_background">
         <!--Title-->
         <TextView
             android:id="@+id/parkinghistoy_TV_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:background="@color/purple_500"
             android:maxLines="1"
             android:padding="16dp"
             android:textStyle="bold"
-            android:textSize="12pt"
+            android:textSize="14pt"
             android:textColor="@color/white"
             android:text="Parking History"/>
         <!--ListView-->

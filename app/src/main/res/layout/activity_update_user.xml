@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_background"
+    android:background="@drawable/ic_launcher_background"
     tools:context=".activiities.UpdateUserActivity">
 
     <LinearLayout
@@ -78,8 +78,8 @@
             android:layout_marginBottom="32dp"
             android:text="Apply"
 
-            android:textColor="@color/purple_650"
+            android:textColor="@color/purple_500"
             app:cornerRadius="50dp"
-            app:strokeColor="@color/purple_650" />
+            app:strokeColor="@color/purple_500" />
     </LinearLayout>
 </RelativeLayout>

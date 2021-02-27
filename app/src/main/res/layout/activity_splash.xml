@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_background"
+    android:background="@drawable/ic_launcher_background"
     tools:context=".activiities.SplashActivity">
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,15 +12,12 @@
         android:orientation="vertical"
         android:gravity="center_horizontal"
         >
-        <TextView
+        <ImageView
             android:id="@+id/splash_TEXTVIEW_logo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginTop="64dp"
             android:text="Spark"
-            android:textColor="@color/white"
-            android:textSize="34pt"
-            android:textStyle="bold"/>
+            android:src="@drawable/spark_icon"/>
     </LinearLayout>
 </RelativeLayout>

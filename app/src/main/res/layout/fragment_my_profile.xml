@@ -5,24 +5,25 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.MyProfileFragment"
-    android:background="@drawable/gradient_background">
+    android:background="@drawable/ic_launcher_background">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_horizontal"
         android:orientation="vertical">
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:background="@color/purple_500"
             android:maxLines="1"
             android:padding="16dp"
-            android:textStyle="bold"
-            android:textSize="12pt"
+            android:layout_marginTop="34dp"
+            android:text="My profile"
             android:textColor="@color/white"
-            android:text="My profile"/>
+            android:textSize="14pt"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -176,7 +177,7 @@
             android:hint="select vehicle"
             android:textColorHint="@color/white"
             app:helperText="select vehicle to conncect"
-            app:helperTextTextColor="@color/purple_650"
+            app:helperTextTextColor="@color/black"
             android:textColor="@color/white"
             app:boxCornerRadiusTopEnd="50dp"
             app:boxCornerRadiusTopStart="50dp"
@@ -216,8 +217,8 @@
             android:textSize="7pt"
             android:layout_weight="1"
             android:text="Edit Profile"
-            android:textColor="@color/purple_650"
-            app:strokeColor="@color/purple_650"
+            android:textColor="@color/purple_500"
+            app:strokeColor="@color/purple_500"
             app:cornerRadius="50dp" />
 
         <com.google.android.material.button.MaterialButton
@@ -230,7 +231,7 @@
             android:layout_weight="1"
             android:text="@string/logout"
             android:textSize="7pt"
-            android:backgroundTint="@color/purple_600"
+            android:backgroundTint="@color/purple_500"
             android:textColor="@color/light_gray"
             app:cornerRadius="50dp"/>
     </LinearLayout>
