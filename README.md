@@ -1,7 +1,7 @@
 # Spark-Parking Android App
 <img src="https://i.ibb.co/DpH3szG/parking-copy.png" align="left"
 width="150" hspace="10" vspace="10">
-## Description
+### Description:
 
 Spark is an intuitive android parking app for saving, sharing, and navigating to parking.
 
