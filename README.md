@@ -13,4 +13,4 @@ Spark is an intuitive android parking app for saving, sharing, and navigating to
 * Full network access.
 * Location access.
 * bluetooth access - (only for auto parking detect feature).
-## License - Ⓒ free to use, all right belong to daniel hay.
+### License - Ⓒ free to use, all right belong to daniel hay.
