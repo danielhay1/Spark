@@ -12,6 +12,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="light_gray">#FAE1E1E1</color>
+    <color name="gray">#FAB5B5B5</color>
     <color name="ripple_effect">#7CFFFFFF</color>
     <color name="light_blue">#8591DF</color>
     <color name="dark_blue">#081673</color>

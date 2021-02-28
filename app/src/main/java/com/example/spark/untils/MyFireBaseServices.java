@@ -25,8 +25,6 @@ public class MyFireBaseServices {
     private  static MyFireBaseServices instance;
     private FirebaseAuth firebaseAuth;
     private FirebaseDatabase database;
-    private User currentUser;
-    private Vehicle vehicle;
 
     public static MyFireBaseServices getInstance() {
         return instance;
@@ -164,12 +162,32 @@ public class MyFireBaseServices {
                 if(dataSnapshot!=null) {
                     Log.d("ptt", "DELETE VEHICLE!");
                     deletePakringFromFireBase(vehicleId);
+                    deleteParkingHistoryFromFireBase(vehicleId);
                     dataSnapshot.getRef().removeValue();
                 }
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.d("pttt", "onCancelled", databaseError.toException());
+            }
+        });
+    }
+    public void deleteParkingHistoryFromFireBase(String vehicleId) {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference(MY_PARKING_HISTORY);
+        Query applesQuery = ref.child(vehicleId).equalTo(vehicleId);
+        applesQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot!=null) {
+                    Log.d("ptt", "DELETE PARKING HISTORY!");
+                    dataSnapshot.getRef().removeValue();
+                } else {
+                    Log.d("pttt", "onDataChange:no vehicle found!");
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.d("pttt", "onCancelled:", error.toException());
             }
         });
     }
@@ -184,12 +202,12 @@ public class MyFireBaseServices {
                     Log.d("ptt", "DELETE PARKING!" );
                     dataSnapshot.getRef().removeValue();
                 } else {
-                    Log.d("pttt", "onDataChange: Vehicle delete, there is no parking for this vehicle!");
+                    Log.d("pttt", "onDataChange:no vehicle found!");
                 }
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.d("pttt", "onCancelled: Vehicle delete, there is no parking for this vehicle!", error.toException());
+                Log.d("pttt", "onCancelled:", error.toException());
             }
         });
     }

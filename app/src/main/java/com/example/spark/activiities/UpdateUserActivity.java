@@ -57,17 +57,20 @@ public class UpdateUserActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 InputStatus res = updateDetails();
+                if(res == InputStatus.OK)
+                {
+                    Log.d("pttt", "onClick: update details succeed!");
+                }
             }
         });
     }
 
     private void submitInsertedData(InputStatus inputStatus) {
+        /**
+         * Method check if inserted data is valid, if does submits the data.
+         */
         if (inputStatus == InputStatus.OK) {
             submit();
-        } else if (inputStatus == InputStatus.INVALID_INPUT) {
-            MySignal.getInstance().toast("Username or Vehicle_id has invalid input please make sure the input is legal.");
-        } else {
-            MySignal.getInstance().toast("Username or Vehicle_id isn't inserted, to apply fill all fields!");
         }
     }
 
@@ -94,6 +97,9 @@ public class UpdateUserActivity extends AppCompatActivity {
     }
 
     private void getUser() {
+        /**
+         * Method load get user from the called activity.
+         */
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             Gson gson = new Gson();
@@ -113,43 +119,15 @@ public class UpdateUserActivity extends AppCompatActivity {
         String vehicleNumber = updateUser_EDT_vehicleNumber.getText().toString();
         String VehicleNick = updateUser_EDT_vehicleNick.getText().toString();
         InputStatus userUpdated = updateUser(name, vehicleNumber);
-/*        if(previousUserVehicleId !=null && user.isOwnedVehicle(previousUserVehicleId) && (!previousUserVehicleId.equals(vehicleNumber))) {
-            removeVehicleOwner(previousUserVehicleId,vehicleNumber,user.getUid());
-        }*/
         Log.e("pttt","user="+user);
         if (userUpdated == InputStatus.OK) {
-            loadVehicle(name, vehicleNumber, VehicleNick,InputStatus.OK);
+            loadVehicle(vehicleNumber, VehicleNick,InputStatus.OK);
+        } else if (userUpdated == InputStatus.INVALID_INPUT) {
+            MySignal.getInstance().toast("Username or Vehicle_id has invalid input please make sure the input is legal.");
+        } else {
+            MySignal.getInstance().toast("Username or Vehicle_id isn't inserted, to apply fill all fields!");
         }
         return userUpdated;
-    }
-
-    private void removeVehicleOwner(String vehicleID, String updatedVehicleId, String uid) {
-        /**
-         * Method checks if vehicle has no owners, if does delete vehicle from DB.
-         */
-        Log.e("pttt", "removeVehicleOwner: ");
-        MyFireBaseServices.getInstance().loadVehicleFromFireBase(vehicleID, new MyFireBaseServices.CallBack_LoadVehicle() {
-            @Override
-            public void vehicleDetailsUpdated(Vehicle result) {
-                if(result != null) {
-                    if(result.isOwnedBy(uid)) {
-                        result.removeOwner(uid);
-                        if(result.hasNoOwners()){
-                            MyFireBaseServices.getInstance().deleteVehicleFromFireBase(result.getVehicleID());
-                            user.removeVehicle(vehicleID);
-                            user.setConnectedVehicleID(updatedVehicleId);
-                        }
-                    }
-                } else {
-                    Log.d("pttt", "loadFailed: Failed to read value: VALUE IS NULL!");
-                }
-            }
-
-            @Override
-            public void loadFailed(Exception e) {
-                Log.d("pttt", "loadFailed: Failed to read value "+e.getMessage());
-            }
-        });
     }
 
     private InputStatus updateUser(String name, String vehicleNumber) {
@@ -168,7 +146,7 @@ public class UpdateUserActivity extends AppCompatActivity {
         }
     }
 
-    private void loadVehicle(String userName, String vehicleNumber, String vehicleNick,InputStatus inputStatus) {
+    private void loadVehicle(String vehicleNumber, String vehicleNick,InputStatus inputStatus) {
         /**
          * Method load vehicle from DB, if vehicle_number is in DB method update vehicle nick
          * if vehicle_number isn't in the DB, creates new vehicle and insert it to DB.
@@ -182,7 +160,6 @@ public class UpdateUserActivity extends AppCompatActivity {
                 .setVehicleID(vehicleNumber)
                 .setVehicleNick(vehicleNick);
         vehicle.addOwner(user.getUid());
-        //vehicle.addOwnerName(userName);
         MyFireBaseServices.getInstance().loadVehicleFromFireBase(vehicleNumber, new MyFireBaseServices.CallBack_LoadVehicle() {
             @Override
             public void vehicleDetailsUpdated(Vehicle result) {
@@ -191,11 +168,7 @@ public class UpdateUserActivity extends AppCompatActivity {
                     if (!result.isOwnedBy(user.getUid())) {
                         Log.d("pttt", "Vehicle has new owner!");
                         result.addOwner(user.getUid());
-                        //result.addOwnerName(userName);
-                    } else {
-                        //result.changeOwnerName(user.getUid(),userName);
                     }
-
                     vehicle = result;
                     Log.d("pttt", "vehicleDetailsUpdated: "+vehicle);
                     submitInsertedData(inputStatus);
@@ -213,16 +186,19 @@ public class UpdateUserActivity extends AppCompatActivity {
     }
 
     private InputStatus updateValue(String valType, String value) {
+        /**
+         * Method check input and return valid status of the input.
+         */
         InputStatus inputStatus = InputStatus.OK;
         if (!value.equalsIgnoreCase("")) {
             if (valType.equalsIgnoreCase("name")) {
-                if (!validInputCheck("[A-Za-z]+", value)) {
+                if (!validInputCheck("[A-Za-z ]+", value)) {
                     inputStatus = InputStatus.INVALID_INPUT;
                 } else {
                     user.setName(value);
                 }
             } else if (valType.equalsIgnoreCase("Vehicle number")) {
-                if (!validInputCheck("[0-9]+", value)) {
+                if (!validInputCheck("[0-9A-Za-z]+", value)) {
                     inputStatus = InputStatus.INVALID_INPUT;
                 } else {
                     user.setConnectedVehicleID(value);
@@ -241,7 +217,7 @@ public class UpdateUserActivity extends AppCompatActivity {
          */
         Pattern p = Pattern.compile(pattern);
         Matcher matcher = p.matcher(insertedVal);
-        return matcher.find();
+        return matcher.matches();
     }
 
     @Override

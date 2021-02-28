@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
@@ -296,7 +295,6 @@ public class Map_Fragment extends Fragment{
         }
     }
 
-    //DELETE ORIGIN COMMENT LINE
     private void onParkClick(String markerTitle, String markerIcon) {
         MyLocationServices.getInstance().setLastBestLocation(new MyLocationServices.CallBack_Location() {
             @Override
@@ -306,8 +304,7 @@ public class Map_Fragment extends Fragment{
                 {
                     Log.d("pttt", "locationReady: currentParkingLocation = "+currentLocation.toString());
                     if(myParkingMarker == null) {
-                        LatLng parkinglocation = new LatLng(32.063557,34.820062);   //DELETE THIS DEBUG LINE!
-                        myParkingMarker = park(googleMap, parkinglocation,markerTitle,markerIcon);
+                        myParkingMarker = park(googleMap, currentLocation,markerTitle,markerIcon);
                         saveParkingLocation(preferenceLatlagKey, myParkingMarker.getPosition());
                     }
                 }
@@ -349,7 +346,10 @@ public class Map_Fragment extends Fragment{
         route = googleMap.addPolyline(routeBulider.getPolylineRoute());
     }
 
-    private void updateRouteLbls(RouteBulider routeBulider ,LatLng origin, LatLng destination) {
+    private void updateRouteDetails(RouteBulider routeBulider , LatLng origin, LatLng destination) {
+        /**
+         * Method update distance and estimate walking time between origin to destination.
+         */
         if(origin!=null && destination!=null) {
             Log.d("pttt", "updateRouteLbls: origin="+origin+", dest="+destination);
             String distance = routeBulider.routeDistanceToString(origin,destination);
@@ -439,7 +439,7 @@ public class Map_Fragment extends Fragment{
         LatLng destination = myParkingMarker.getPosition();
         routeBulider = new RouteBulider(origin,destination,this.getActivity().getApplicationContext());
         drawRoute(origin,destination,routeBulider);
-        updateRouteLbls(routeBulider,origin,destination);
+        updateRouteDetails(routeBulider,origin,destination);
     }
 
     private void initCurrentLocation() {
@@ -515,7 +515,7 @@ public class Map_Fragment extends Fragment{
 
     private void requestPermision() {
         /**
-         *         Asks the user do accept location permission.
+         * Asks the user do accept location permission.
          */
         requestPermissions(new String[]{
                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -528,19 +528,13 @@ public class Map_Fragment extends Fragment{
         Log.d("pttt", "Map_Fragment - onRequestPermissionsResult:\t requestCode="+requestCode);
         switch (requestCode) {
             case MainActivity.MY_PERMISSIONS_REQUEST_LOCATION : {
-                // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
                     initMapFragment();
                     Log.d("pttt", "onRequestPermissionsResult: APPROVE");
                     MySignal.getInstance().toast("Permission granted");
 
                 } else {
-
-                    // permission denied, Disable the
-                    // functionality that depends on this permission.
                     Log.d("pttt", "onRequestPermissionsResult: DENY");
                     MySignal.getInstance().toast("Permission denied");
                 }
@@ -578,6 +572,10 @@ public class Map_Fragment extends Fragment{
     }
 
     private void getUser() {
+        /**
+         * Method load get user from activity, if it fail -> try to load user from firebase,
+         * if it fail -> return new user.
+         */
         if(user == null || user.getConnectedVehicleID().equalsIgnoreCase("")) {
             user = new User()
                     .setUid(MyFireBaseServices.getInstance().getUID())
@@ -609,6 +607,9 @@ public class Map_Fragment extends Fragment{
     }
 
     private void getUserFromFireBase(String uid){
+        /**
+         * Method load user from firebase.
+         */
         MyFireBaseServices.getInstance().loadUserFromFireBase(uid, new MyFireBaseServices.CallBack_LoadUser() {
             @Override
             public void userDetailsUpdated(User result) {
@@ -660,7 +661,7 @@ public class Map_Fragment extends Fragment{
             public void parkingLocationUpdated(Parking parking) {
                 if(parking != null) {
                     if(parking.getLatitude()!=0 || parking.getLongitude()!=0) {
-                        if(parking.getUid() == user.getUid()) {
+                        if(parking.getUid() != user.getUid()) {
                             MyFireBaseServices.getInstance().loadUserFromFireBase(parking.getUid(), new MyFireBaseServices.CallBack_LoadUser() {
                                 @Override
                                 public void userDetailsUpdated(User result) {
@@ -675,9 +676,9 @@ public class Map_Fragment extends Fragment{
                                 }
                             });
                         } else {
+                            Log.d("pttt", "parkingLocationUpdated: parkingLocation="+parking);
                             String msg = getParkingMarkerMsg(user.getName(),parking.getTime());
                             myParkingMarker = park(googleMap,new LatLng(parking.getLatitude(),parking.getLongitude()),msg, PARKING_ICON);
-                            Log.d("pttt", "parkingLocationUpdated: parkingLocation="+parking);
                         }
                     }
                 } else {
@@ -758,7 +759,7 @@ public class Map_Fragment extends Fragment{
                 if(parking_state == PARKING_STATE.NAVIGATING) {
                     if(myParkingMarker!=null) {
                         LatLng destination = myParkingMarker.getPosition();
-                        updateRouteLbls(routeBulider,myCurrentLocation,destination);
+                        updateRouteDetails(routeBulider,myCurrentLocation,destination);
                     }
                 }
             }
@@ -777,6 +778,9 @@ public class Map_Fragment extends Fragment{
 
     //Callback method
     public void addHistoryMarkerToMap(Parking parking) {
+        /**
+         * Callback method that call by click on element from list view in ParkingHistoryFragment, method set marker of the history parking on map.
+         */
         LatLng latLng = new LatLng(parking.getLatitude(),parking.getLongitude());
         String name = user.getName();
         Log.d("pttt", "addHistoryMarkerToMap: Marker Latlng= "+latLng);
@@ -835,8 +839,8 @@ public class Map_Fragment extends Fragment{
 
     public boolean onBackPress() {
         /**
-         * Method
          * If parking_state = PARKING_STATE.DRIVING method return false
+         * else method return true.
          */
         if(parking_state == PARKING_STATE.DRIVING) {
             return true;

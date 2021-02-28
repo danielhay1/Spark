@@ -53,9 +53,6 @@ public class MyProfileFragment extends Fragment {
     private String userNames="";
     private boolean isResumed=false;
 
-
-    public static final String SELECTED_VEHICLE_RESULTCODE = "user_vehicle";
-
     public interface FragmentToActivity {
         public void onDataPass(String data);
     }
@@ -172,6 +169,10 @@ public class MyProfileFragment extends Fragment {
     }
 
     private void getUser() {
+        /**
+         * Method load get user from activity, if it fail -> try to load user from firebase,
+         * if it fail -> return new user.
+         */
         if(user == null || user.getConnectedVehicleID().equalsIgnoreCase("")) {
             user = new User()
                     .setUid(MyFireBaseServices.getInstance().getUID())
@@ -195,6 +196,9 @@ public class MyProfileFragment extends Fragment {
     }
 
     private void getUserFromFireBase(String uid) {
+        /**
+         * Method load user from firebase.
+         */
         MyFireBaseServices.getInstance().loadUserFromFireBase(uid, new MyFireBaseServices.CallBack_LoadUser() {
             @Override
             public void userDetailsUpdated(User result) {
@@ -212,6 +216,9 @@ public class MyProfileFragment extends Fragment {
     }
 
     private void setmMyVehicles(ArrayList<String> myVehicles){
+        /**
+         * Method build droplist of all user vehicles.
+         */
         if(this.adapter.isEmpty()) {
             myprofile_ACT_myVehicles.setText("User has no vehicles!");
             myprofile_ACT_myVehicles.setTextColor((Color.RED));
@@ -234,11 +241,13 @@ public class MyProfileFragment extends Fragment {
     }
 
     private void sendResult(User user) {
+        /**
+         * Method saves user connected vehicle and update it in MainActivity and all his fragments, update save it in firebase too.
+         */
         MyFireBaseServices.getInstance().saveUserToFireBase(user);  //save user connected vehicle in firebase.
         Gson gson = new Gson();
         String jsonUser = gson.toJson(user);
         fragmentToActivityCallBack.onDataPass(jsonUser);
-        // send result to Activity and other fragments;
     }
 
 
@@ -249,6 +258,9 @@ public class MyProfileFragment extends Fragment {
     }
 
     private void updateUserData(User user) {
+        /**
+         * Method updates my profile data.
+         */
         if(user != null) {
             adapter = new ArrayAdapter<String>(this.getContext(),R.layout.dropdown_item,user.getMyVehicles());
             updateField(user.getName(),myprofile_TV_name);
@@ -317,6 +329,9 @@ public class MyProfileFragment extends Fragment {
     }
 
     public void loadVehicleOwnersName(Vehicle vehicle) {
+        /**
+         * Method load all user names of the connected vehicle.
+         */
         if(!vehicle.getOwnersUID().isEmpty()) {
             ArrayList<String> ownersUid = vehicle.getOwnersUID();
             myprofile_TV_vehicleOwners.setText("");
