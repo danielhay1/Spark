@@ -8,7 +8,6 @@ Spark is an intuitive android parking app for saving, sharing, and navigating to
 * Save parking location and details and share it automatically with all users that are connected to the same vehicle.
 * Each user can have multiple vehicles, and can easily switch between them to follow each of them parkings.
 * Watch vehicle parking history, and set a marker of history parking on the map.
-* 
 ## Screenshots
 ## permissions
 * Full network access.
