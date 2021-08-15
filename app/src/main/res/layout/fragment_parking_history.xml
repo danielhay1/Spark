@@ -1,28 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".fragments.ParkingHistoryFragment">
 
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="120dp"
+        android:background="@drawable/ic_launcher_background">
+
+        <TextView
+            android:id="@+id/parkinghistoy_TV_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Parking History"
+            android:layout_margin="15dp"
+            android:layout_below="@+id/myprofile_IV_profileImage"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/white"
+            android:layout_centerHorizontal="true"
+            android:textSize="32sp" />
+    </RelativeLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="@drawable/ic_launcher_background">
+        android:layout_below="@+id/relativeLayout2">
         <!--Title-->
-        <TextView
-            android:id="@+id/parkinghistoy_TV_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:maxLines="1"
-            android:layout_margin="34dp"
-            android:padding="16dp"
-            android:textStyle="bold"
-            android:textSize="14pt"
-            android:textColor="@color/white"
-            android:text="Parking History"/>
+
         <!--ListView-->
         <ListView
             android:id="@+id/parkinghistoy_LV_parking"
@@ -32,4 +43,4 @@
             android:listSelector="@color/selector_purple" />
     </LinearLayout>
 
-</FrameLayout>
+</RelativeLayout>

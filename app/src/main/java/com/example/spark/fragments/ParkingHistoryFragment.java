@@ -55,23 +55,24 @@ public class ParkingHistoryFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_parking_history, container, false);
+        Log.e("pttt", "(ONCRATE: PARKINGHISTORY)");
         findViews(view);
         this.getUser();
-
         return view;
     }
 
     private void findViews(View view) {
+        Log.e("pttt", "(PARKINGHISTORY- findViews)");
         parkinghistoy_TV_title = view.findViewById(R.id.parkinghistoy_TV_title);
         parkinghistoy_LV_parking = view.findViewById(R.id.parkinghistoy_LV_parking);
+        Log.e("pttt", "(parkinghistoy_LV_parking="+parkinghistoy_LV_parking);
     }
 
     private void InitViews(){
         parkinghistoy_LV_parking.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                parkinghistoy_LV_parking.setSelection(R.color.selector_purple);
-                if(parkings[position] != null) {
+                if(parkings[position] != null && sendLatLngCallBack!=null) {
                     sendLatLngCallBack.sendLatLng(parkings[position]);  //Send parking to add maker on map fragment.
                 }
             }
@@ -143,7 +144,11 @@ public class ParkingHistoryFragment extends Fragment {
 
     public void getParkingHistory() {
         Log.d("pttt", "getParkingHistory: (for vehicle): "+this.user.getConnectedVehicleID());
-        parkinghistoy_LV_parking.setAdapter(null);
+        if(parkinghistoy_LV_parking==null) {
+            Log.e("pttt", "parkinghistoy_LV_parking: null");
+        } else {
+            parkinghistoy_LV_parking.setAdapter(null);
+        }
         customListViewAdapter = null;
         MyFireBaseServices.getInstance().loadParkingHistoryFromFireBase(user.getConnectedVehicleID(), MAX_ROWS, new MyFireBaseServices.CallBack_LoadParking() {
             @Override
@@ -187,7 +192,7 @@ public class ParkingHistoryFragment extends Fragment {
             }
         }
         if(indexs.isEmpty()) {
-            customListViewAdapter = new CustomListView(getActivity(),vehicleIds,userNames,times,latitudes,longitudes);
+            customListViewAdapter = new CustomListView(getActivity(),vehicleIds,userNames,times);
             parkinghistoy_LV_parking.setAdapter(customListViewAdapter);
             InitViews();
         } else {
@@ -197,7 +202,7 @@ public class ParkingHistoryFragment extends Fragment {
                     public void userDetailsUpdated(User result) {
                         userNames[index] = result.getName();
                         if(index == indexs.size()-1) {    //last element.
-                            CustomListView customListView = new CustomListView(getActivity(),vehicleIds,userNames,times,latitudes,longitudes);
+                            CustomListView customListView = new CustomListView(getActivity(),vehicleIds,userNames,times);
                             parkinghistoy_LV_parking.setAdapter(customListView);
                             InitViews();
                         }

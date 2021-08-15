@@ -3,13 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <fragment
-        android:id="@+id/google_maps"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:name="com.google.android.gms.maps.SupportMapFragment"/>
-
     <Switch
         android:id="@+id/map_SWITCH_autopark"
         android:layout_width="match_parent"
@@ -20,6 +13,13 @@
         android:textColor="@color/appBackgroundColor"
         android:checked="false"
         />
+
+    <fragment
+        android:id="@+id/google_maps"
+        android:layout_below="@+id/map_SWITCH_autopark"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.google.android.gms.maps.SupportMapFragment"/>
 
     <LinearLayout
         android:id="@+id/horizontal_Linarlayout"
@@ -56,6 +56,18 @@
     </LinearLayout>
 
     <ImageView
+        android:id="@+id/map_BTN_daynight"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/horizontal_Linarlayout"
+        android:layout_alignParentRight="true"
+        android:alpha="0.85"
+        android:src="@drawable/sun_icon"
+        android:layout_marginTop="24dp"
+        android:layout_marginRight="24dp"
+
+        />
+    <ImageView
         android:id="@+id/map_BTN_cancel"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -88,6 +100,8 @@
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="0dp"
         android:gravity="bottom|center_horizontal"
         android:orientation="vertical">
 
@@ -119,8 +133,8 @@
             android:layout_gravity="right"
             android:layout_marginRight="24dp"
             android:layout_marginBottom="104dp"
-            android:foreground="@drawable/ripple_effect"
             android:alpha="0.85"
+            android:foreground="@drawable/ripple_effect"
             android:src="@drawable/icon_mylocation_focus_gray" />
 
         <ImageView

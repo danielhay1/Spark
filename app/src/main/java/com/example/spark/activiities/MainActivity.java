@@ -2,12 +2,14 @@ package com.example.spark.activiities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.viewpager.widget.ViewPager;
 
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements MyProfileFragment
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("pttt", "onCreate: MAIN ACTIVITY");
         setContentView(R.layout.activity_main);
         if(fireBaseLogin()) {   //FireBase login
             findViews();
@@ -203,7 +206,6 @@ public class MainActivity extends AppCompatActivity implements MyProfileFragment
         intent.putExtra(USER_INTENT,data);
         this.onActivityResult(UPDATE_USER | 0xffff0000,Activity.RESULT_OK,intent);
     }
-
 
     private Bundle sendUserToFragment() {
         String jsonUser = getJsonUser(this.user);

@@ -114,17 +114,18 @@ public class RouteBulider {
                     .destination(stringLatLng(destination))
                     .await();
         } catch (ApiException e) {
-            Log.d("pttt", "getDirectionsResult: "+e.getStackTrace());
+            Log.d("pttt", "API Exception in getDirectionsResult: "+e.getStackTrace());
         } catch (InterruptedException e) {
-            Log.d("pttt", "getDirectionsResult: "+e.getStackTrace());
+            Log.d("pttt", "INTERRUPTED Exception in getDirectionsResult: "+e.getStackTrace());
         } catch (IOException e) {
-            Log.d("pttt", "getDirectionsResult: "+e.getStackTrace());
+            Log.d("pttt", "I/O Exception in getDirectionsResult: "+e.getStackTrace());
         }
         return directionsResult;
     }
 
     private double getRouteDistance(LatLng origin, LatLng destination) {
         DirectionsResult directionsResult = getDirectionsResult(origin,destination);
+        Log.e("pttt", "getRouteDistance: "+directionsResult);
         // - Parse the result
         DirectionsRoute route = directionsResult.routes[0];
         DirectionsLeg leg = route.legs[0];

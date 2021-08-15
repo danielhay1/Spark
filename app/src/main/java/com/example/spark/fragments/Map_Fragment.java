@@ -7,7 +7,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.os.Bundle;
@@ -24,6 +26,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
 import com.example.spark.R;
@@ -47,6 +50,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -93,6 +97,7 @@ public class Map_Fragment extends Fragment{
     private ImageView map_BTN_cancelHistoryParking;
     private ImageView map_BTN_parkingFocus;
     private ImageView map_BTN_FollowMyCurrentLocation;
+    private ImageView map_BTN_daynight;
     private Switch map_SWITCH_autopark;
     //EditText
     private TextView map_TV_distance;
@@ -137,6 +142,7 @@ public class Map_Fragment extends Fragment{
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Log.e("pttt", "onCreateView: map_fragment");
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         findViews(view);
         SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.google_maps);
@@ -168,6 +174,7 @@ public class Map_Fragment extends Fragment{
         map_SWITCH_autopark = view.findViewById(R.id.map_SWITCH_autopark);
         map_BTN_cancelHistoryParking = view.findViewById(R.id.map_BTN_cancelHistoryParking);
         map_TV_estimateTime = view.findViewById(R.id.map_TV_estimateTime);
+        map_BTN_daynight = view.findViewById(R.id.map_BTN_daynight);
     }
 
     private void initViews() {
@@ -190,6 +197,20 @@ public class Map_Fragment extends Fragment{
                 }
             }
         });
+        map_BTN_daynight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isDarkModeAvailable()) {
+                    //change to day mode
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                } else {
+                    //change to night mode
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                }
+                setTheme(googleMap);
+
+            }
+        });
         map_SWITCH_autopark.setChecked(loadBtSwitchStatus());
     }
 
@@ -206,13 +227,7 @@ public class Map_Fragment extends Fragment{
         if(map != null) {
             Log.d("pttt", "Setting up map");
             enableMyLocation(map);
-            if (myCurrentLocation != null) {
-                setFocus(myCurrentLocation, NORMAL_SCALE);
-            }
-            map.getUiSettings().setMyLocationButtonEnabled(true);
-            map.getUiSettings().setCompassEnabled(true);
-            map.getUiSettings().setRotateGesturesEnabled(true);
-            map.getUiSettings().setZoomControlsEnabled(true);
+
             Log.d("pttt", "setMap: btn="+map.getUiSettings().isMyLocationButtonEnabled());
             map.setOnMyLocationClickListener(new GoogleMap.OnMyLocationClickListener() {
                 @Override
@@ -252,11 +267,28 @@ public class Map_Fragment extends Fragment{
         Log.d("pttt", "setupMap: MAP STARTED!");
     }
 
+    private boolean isDarkModeAvailable() {
+        int nightModeFlags =getContext().getResources().getConfiguration().uiMode &
+                Configuration.UI_MODE_NIGHT_MASK;
+        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    private void setTheme(GoogleMap map) {
+        if(isDarkModeAvailable()) {
+            map.setMapStyle(MapStyleOptions.loadRawResourceStyle(this.getContext(),R.raw.map_in_night));
+            map_SWITCH_autopark.setBackgroundColor(Color.BLACK);
+            map_TV_distance.setBackgroundColor(Color.BLACK);
+            map_TV_estimateTime.setBackgroundColor(Color.BLACK);
+            ImgLoader.getInstance().loadImg("moon_icon",map_BTN_daynight);
+        } else {
+            ImgLoader.getInstance().loadImg("sun_icon",map_BTN_daynight);
+        }
+    }
+
     private void enableMyLocation(GoogleMap map) {
         if (MyLocationServices.getInstance().checkLocationPermission()) {
             if (map != null) {
                 initCurrentLocation();
-                map.setMyLocationEnabled(true);
             }
         }
     }
@@ -289,10 +321,17 @@ public class Map_Fragment extends Fragment{
     }
 
     private void initMapFragment() {
-        if(googleMap != null && !isMapSetUp && gpsEnabled) {
-            setupMap(googleMap);
-            setLocationSource(googleMap);
+        if(googleMap != null) {
+            setTheme(googleMap);
+            if(!isMapSetUp && gpsEnabled) {
+                setupMap(googleMap);
+                setLocationSource(googleMap);
+                if (myCurrentLocation != null) {
+                    setFocus(myCurrentLocation, NORMAL_SCALE);
+                }
+            }
         }
+
     }
 
     private void onParkClick(String markerTitle, String markerIcon) {
@@ -304,7 +343,7 @@ public class Map_Fragment extends Fragment{
                 {
                     Log.d("pttt", "locationReady: currentParkingLocation = "+currentLocation.toString());
                     if(myParkingMarker == null) {
-                        myParkingMarker = park(googleMap, currentLocation,markerTitle,markerIcon);
+                        myParkingMarker = park(googleMap,currentLocation,markerTitle,markerIcon);
                         saveParkingLocation(preferenceLatlagKey, myParkingMarker.getPosition());
                     }
                 }
@@ -452,10 +491,17 @@ public class Map_Fragment extends Fragment{
                     Log.d("pttt", "locationReady: currentLocation = "+latLng.toString());
                     if(myCurrentLocation == null) {
                         myCurrentLocation = latLng;
-
                         if(locationChangedListener!=null) {
                             locationChangedListener.onLocationChanged(location);
                         }
+                        if (MyLocationServices.getInstance().checkLocationPermission()) {
+                            googleMap.setMyLocationEnabled(true);
+                        }
+                        googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+                        googleMap.getUiSettings().setCompassEnabled(false);
+                        googleMap.getUiSettings().setRotateGesturesEnabled(true);
+                        googleMap.getUiSettings().setZoomControlsEnabled(true);
+                        googleMap.getUiSettings().setTiltGesturesEnabled(false);
                     }
                     setFocus(latLng,NORMAL_SCALE);
                 }
@@ -554,12 +600,16 @@ public class Map_Fragment extends Fragment{
                 Gson gson = new Gson();
                 User temp = gson.fromJson(result,User.class);
                 Log.d("pttt", "onActivityResult (MapFragment): user updated, user ="+temp);
-                preferenceLatlagKey = user.getConnectedVehicleID();
-                if(!temp.getConnectedVehicleID().equals(user.getConnectedVehicleID())&& preferenceLatlagKey !=null) {
-                    Log.d("pttt", "onActivityResult: \tconnectedUser="+user.getConnectedVehicleID()+",updatedUser="+temp.getConnectedVehicleID());
-                    this.user = temp;
-                    cancelParking();
-                    myParkingMarker = loadParkingLocation(preferenceLatlagKey);   //setMyParking
+                if(user!=null) {
+                    preferenceLatlagKey = user.getConnectedVehicleID();
+                    if(!temp.getConnectedVehicleID().equals(user.getConnectedVehicleID())&& preferenceLatlagKey !=null) {
+                        Log.d("pttt", "onActivityResult: \tconnectedUser="+user.getConnectedVehicleID()+",updatedUser="+temp.getConnectedVehicleID());
+                        this.user = temp;
+                        cancelParking();
+                        myParkingMarker = loadParkingLocation(preferenceLatlagKey);   //setMyParking
+                    } else {
+                        this.user = temp;
+                    }
                 } else {
                     this.user = temp;
                 }

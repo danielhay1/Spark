@@ -31,9 +31,7 @@ public class BluetoothBackgroundService extends Service {
     }
 
     @Override
-    public void onCreate() {
-        MySignal.getInstance().toast("Parking Auto Parking Service - ON");
-    }
+    public void onCreate() { }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -41,6 +39,7 @@ public class BluetoothBackgroundService extends Service {
          * Check in background service if device connection to a bluetooth device, if it does when bluetooth disconnect application save parking location.
          */
         Log.d("pttt", "onStartCommand:");
+        MySignal.getInstance().toast("Parking Auto Parking Service - ON");
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         bluetoothTurnOn(mBluetoothAdapter);
         stopped = false;
