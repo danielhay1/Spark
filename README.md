@@ -2,18 +2,13 @@
 <img src="https://i.ibb.co/DpH3szG/parking-copy.png" align="left"
 width="150" hspace="10" vspace="10">
 ### Description:
-
 Spark is an intuitive android parking app for saving, sharing, and navigating to parking.
 
 Spark allows user easily to locate parking location
 and automatically share it with all users that are connected to the same connected vehicle.
 
-
-
-
-
-
-
+### Tired of searching your car?
+![Alt Text](https://tenor.com/view/dude-car-dude-wheres-my-car-gif-15075840.gif)
 
 ## Highlight features:
 * Automatic parking detect - allow users to save parking location and details via Bluetooth even when the app is only open in the background.
