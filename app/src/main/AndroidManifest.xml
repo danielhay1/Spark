@@ -20,7 +20,8 @@
         <activity android:name=".activiities.UpdateUserActivity"></activity>
         <activity
             android:name=".activiities.SplashActivity"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar">
+            android:theme="@style/Theme.MaterialComponents.NoActionBar"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -39,8 +40,14 @@
             android:name=".activiities.MainActivity"
             android:screenOrientation="portrait"/>
 
-        <service android:name=".untils.GpsTracker_service" />
-        <service android:name=".objects.BluetoothBackgroundService"/>
+        <service
+            android:name=".untils.GpsTracker_service"
+            android:exported="false"
+            />
+        <service
+            android:name=".objects.BluetoothBackgroundService"
+            android:exported="false"
+            />
     </application>
 
 </manifest>

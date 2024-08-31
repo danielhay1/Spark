@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.2"
+    namespace 'com.example.spark'
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.example.spark"
         minSdkVersion 23
-        targetSdkVersion 30
+        targetSdk 34  // Update this to the latest stable version
         versionCode 1
         versionName "1.0"
 
