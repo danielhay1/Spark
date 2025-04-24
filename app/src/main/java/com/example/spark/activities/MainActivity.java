@@ -1,15 +1,13 @@
-package com.example.spark.activiities;
+package com.example.spark.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.viewpager.widget.ViewPager;
 
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -22,6 +20,7 @@ import com.example.spark.objects.Vehicle;
 import com.example.spark.untils.MyLocationServices;
 import com.example.spark.untils.GpsTracker_service;
 import com.example.spark.untils.MySignal;
+
 import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
@@ -92,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements MyProfileFragment
          */
         boolean loginSuccess = MyFireBaseServices.getInstance().login();
         if(!loginSuccess) {
-            Intent myIntent = new Intent(this,LoginActivity.class);
+            Intent myIntent = new Intent(this, LoginActivity.class);
             startActivity(myIntent);
             finish();
         }

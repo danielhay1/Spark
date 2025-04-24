@@ -1,15 +1,13 @@
-package com.example.spark.activiities;
+package com.example.spark.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.animation.Animator;
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.example.spark.R;
 

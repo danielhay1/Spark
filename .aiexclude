@@ -1,0 +1,6 @@
+/build
+     /captures
+     *.keystore
+     secrets/
+     local.properties
+     */map_api.xml

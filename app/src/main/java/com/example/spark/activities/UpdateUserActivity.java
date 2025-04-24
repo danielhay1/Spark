@@ -1,4 +1,4 @@
-package com.example.spark.activiities;
+package com.example.spark.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 

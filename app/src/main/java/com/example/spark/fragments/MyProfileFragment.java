@@ -22,9 +22,9 @@ import android.widget.TextView;
 
 
 import com.example.spark.R;
-import com.example.spark.activiities.MainActivity;
-import com.example.spark.activiities.SplashActivity;
-import com.example.spark.activiities.UpdateUserActivity;
+import com.example.spark.activities.MainActivity;
+import com.example.spark.activities.SplashActivity;
+import com.example.spark.activities.UpdateUserActivity;
 import com.example.spark.objects.Vehicle;
 import com.example.spark.untils.MyFireBaseServices;
 import com.example.spark.objects.User;

@@ -30,7 +30,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
 import com.example.spark.R;
-import com.example.spark.activiities.MainActivity;
+import com.example.spark.activities.MainActivity;
 import com.example.spark.objects.BluetoothBackgroundService;
 import com.example.spark.objects.BluetoothCallBack;
 import com.example.spark.objects.Parking;

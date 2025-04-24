@@ -17,16 +17,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.spark.R;
-import com.example.spark.activiities.MainActivity;
+import com.example.spark.activities.MainActivity;
 import com.example.spark.objects.CustomListView;
 import com.example.spark.objects.Parking;
 import com.example.spark.objects.User;
 import com.example.spark.untils.MyFireBaseServices;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class ParkingHistoryFragment extends Fragment {
 

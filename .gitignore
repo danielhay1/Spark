@@ -13,3 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+*/map_api.xml
+.aiexclude
